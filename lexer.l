@@ -9,6 +9,7 @@
 void yyerror(const char *);
 %}
 
+%x COMMENT
 /* 
   WRITE ME: put any definitions you need here.  Add your own regular expressions
             below for ALL tokens defined in the manual. You can choose not to use
@@ -31,6 +32,11 @@ void yyerror(const char *);
 
 %%
 
+"[$"          { BEGIN(COMMENT); }
+<COMMENT>"$]" { BEGIN(INITIAL); }
+<COMMENT>.    ; /* skip comments */
+<COMMENT>\n   ; /* skip comments */
+
 bool     { return BOOL;     }
 else     { return ELSE;     }
 if       { return IF;       }
@@ -50,8 +56,6 @@ return   { return RETURN;   }
 
 true     { return TRUE;     }
 false    { return FALSE;    }
-
-\[$.*\$] ; /* skip comments */
 
 [><!\+\-\*\/;,|{}()\[\]=] { return *yytext;    }
 [01]+b                    { return NUMBER;     } /* binary      */
