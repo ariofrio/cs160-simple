@@ -12,7 +12,7 @@ void yyerror(const char *);
 /* 
   WRITE ME: put any definitions you need here.  Add your own regular expressions
             below for ALL tokens defined in the manual. You can choose not to use
-	    definitions here.
+            definitions here.
 
 */
 
@@ -26,11 +26,12 @@ void yyerror(const char *);
 
   The lexer will try to match each regular expression.  When it does it will execute
   the c code.
+
 */
 
 %%
 
-[\*\(\);\+\-\*\/<>=]   { return *yytext; }
+[\*\(\);\+\-\*\/<>=]  { return *yytext; }
 [0-9][0-9]*           { return 'n'; }
 [ \t\n]               ; /* skip whitespace */
 
@@ -38,9 +39,8 @@ void yyerror(const char *);
 
 %%
 
-
 /* You shouldn't need to edit any part of this*/
 
 int yywrap(void) {
-	return 1;
+  return 1;
 }

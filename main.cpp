@@ -6,13 +6,13 @@ extern int yyparse(); // this actually the parser which then calls the scanner
 
 int main(void) {
 
-	// set this to 1 if you would like to print a trace 
-	// of the entire parsing process (it prints to stdout)
-        yydebug = 0; 
+  // set this to 1 if you would like to print a trace 
+  // of the entire parsing process (it prints to stdout)
+  yydebug = 0; 
 
-        yyparse();  
+  yyparse();  
 
-        return 0;
+  return 0;
 
 }
 

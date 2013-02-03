@@ -4,3 +4,4 @@ parser.*
 !parser.ypp
 lexer.*
 !lexer.l
+tags
