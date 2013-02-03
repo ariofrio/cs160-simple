@@ -1,0 +1,6 @@
+*.o
+/simple
+parser.*
+!parser.ypp
+lexer.*
+!lexer.l
