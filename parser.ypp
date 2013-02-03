@@ -10,7 +10,30 @@ int yylex(void);
 
 %error-verbose
 
-/* WRITE ME: put all your token definitions here*/
+%token BOOL       "bool"
+%token ELSE       "else"
+%token IF         "if"
+%token INT        "int"
+%token WHILE      "while"
+%token VAR        "var"
+%token FUNCTION   "function"
+%token INTARRAY   "intarray"
+%token RETURN     "return"
+
+%token EQEQ       "=="
+%token GTEQ       ">="
+%token LEEQ       "<="
+%token NOTEQ      "!="
+%token AND        "&&"
+%token OR         "||"
+
+%token TRUE       "true"
+%token FALSE      "false"
+%token NUMBER     "number"
+%token IDENTIFIER "identifier"
+
+%token END 0      "end of file"
+
 /* WRITE ME: put all your type definitions here*/
 /* WRITE ME: put all your precedence/associativity rules here*/
 
@@ -40,6 +63,21 @@ Expr    : Expr '*' Expr
 %%
 
 /*You shouldn't have to do anything past this*/
+
+#include <string.h>
+void print_token(int token) {
+  if(token < 255) {
+    printf("%c ", token);
+  } else {
+    const char* name = yytname[yytranslate[token]];
+    if(name[0] == '\'' || name[0] == '"') {
+      int length = strlen(name);
+      printf("%.*s ", length - 2, name+1);
+    } else {
+      printf("%s ", name);
+    }
+  }
+}
 
 extern int yylineno;
 

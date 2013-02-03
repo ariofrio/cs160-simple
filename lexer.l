@@ -31,11 +31,35 @@ void yyerror(const char *);
 
 %%
 
-[\*\(\);\+\-\*\/<>=]  { return *yytext; }
-[0-9][0-9]*           { return 'n'; }
-[ \t\n]               ; /* skip whitespace */
+bool     { return BOOL;     }
+else     { return ELSE;     }
+if       { return IF;       }
+int      { return INT;      }
+while    { return WHILE;    }
+var      { return VAR;      }
+function { return FUNCTION; }
+intarray { return INTARRAY; }
+return   { return RETURN;   }
 
-.                     yyerror((char *) "invalid character");
+==       { return EQEQ;     }
+>=       { return GTEQ;     }
+\<=      { return LEEQ;     }
+!=       { return NOTEQ;    }
+&&       { return AND;      }
+\|\|     { return OR;       }
+
+true     { return TRUE;     }
+false    { return FALSE;    }
+
+[><!\+\-\*\/;,|{}()\[\]=] { return *yytext;    }
+[01]+b                    { return NUMBER;     } /* binary      */
+0[xX][0-9A-F]+            { return NUMBER;     } /* hexadecimal */
+0[0-7]+                   { return NUMBER;     } /* octal       */
+[0-9]+                    { return NUMBER;     } /* decimal     */
+[a-zA-Z][a-zA-Z0-9]*      { return IDENTIFIER; }
+
+[ \t\n]                   ; /* skip whitespace */
+.                         yyerror((char *) "invalid character");
 
 %%
 
