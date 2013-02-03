@@ -8,7 +8,6 @@ int yylex(void);
   void yyerror(const char *);
 %}
 
-/* Enables verbose error messages */
 %error-verbose
 
 /* WRITE ME: put all your token definitions here*/
