@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cd $(dirname $0)/..
+cd $(dirname $0)
 echo
 
 report_incorrect() {
@@ -24,13 +24,13 @@ report_correct() {
 
 incorrect=0
 correct=0
-for test in $(find tests/good -name '*.simple'); do
-  error=$(./simple < $test 2>&1)
+for test in $(find good -name '*.simple'); do
+  error=$(../simple < $test 2>&1)
   [ "$error" ] && report_incorrect || report_correct
 done
 
-for test in $(find tests/bad -name '*.simple'); do
-  error=$(./simple < $test 2>&1)
+for test in $(find bad -name '*.simple'); do
+  error=$(../simple < $test 2>&1)
   [ "$error" ] && report_correct || report_incorrect
 done
 
