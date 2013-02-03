@@ -1,0 +1,7 @@
+function int Main() {
+  var int x;
+  x = 2;
+  x = x*3 - 4;
+  return x;
+}
+
