@@ -41,7 +41,7 @@ correct=0
 
 section "Scanner produces expected tokens"
 for test in $(find -name '*.simple' | sort); do
-  error=$(../simple --only-scanner < $test 2>&1 |
+  error=$(../simple --only-scanner < $test |&
     diff --ignore-space-change - ${test%.simple}.tokens 2>&1)
   [ "$error" ] && report_incorrect || report_correct
 done > >(indent)
