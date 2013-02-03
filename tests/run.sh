@@ -24,12 +24,12 @@ report_correct() {
 
 incorrect=0
 correct=0
-for test in $(find good -name '*.simple'); do
+for test in $(find good -name '*.simple' | sort); do
   error=$(../simple < $test 2>&1)
   [ "$error" ] && report_incorrect || report_correct
 done
 
-for test in $(find bad -name '*.simple'); do
+for test in $(find bad -name '*.simple' | sort); do
   error=$(../simple < $test 2>&1)
   [ "$error" ] && report_correct || report_incorrect
 done
