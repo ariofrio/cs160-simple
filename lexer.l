@@ -51,6 +51,8 @@ return   { return RETURN;   }
 true     { return TRUE;     }
 false    { return FALSE;    }
 
+\[$.*\$] ; /* skip comments */
+
 [><!\+\-\*\/;,|{}()\[\]=] { return *yytext;    }
 [01]+b                    { return NUMBER;     } /* binary      */
 0[xX][0-9A-F]+            { return NUMBER;     } /* hexadecimal */

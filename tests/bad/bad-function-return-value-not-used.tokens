@@ -1,1 +1,1 @@
-function int identifier ( ) { return number ; } function int identifier ( ) { identifier ( ) ; [ 
+function int identifier ( ) { return number ; } function int identifier ( ) { identifier ( ) ; return number ; }
