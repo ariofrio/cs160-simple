@@ -1,6 +1,7 @@
 #!/bin/sh
 
 cd $(dirname $0)/..
+echo
 
 report_incorrect() {
   incorrect=$((incorrect + 1))

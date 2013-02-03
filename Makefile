@@ -38,5 +38,5 @@ main.o: parser.hpp
 clean:
 	rm -f $(RMFILES)
 
-test:
+test: $(TARGET)
 	@tests/run.sh
