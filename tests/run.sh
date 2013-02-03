@@ -1,7 +1,14 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 cd $(dirname $0)
-echo
+
+indent() {
+  c='s/^/  /'
+  case $(uname) in
+    Darwin) sed -l "$c";;
+    *)      sed -u "$c";;
+  esac
+}
 
 report_incorrect() {
   incorrect=$((incorrect + 1))
@@ -10,7 +17,7 @@ report_incorrect() {
   tput sgr0; tput setaf 1
   echo $test
   tput sgr0
-  [ "$error" ] && echo "  $error"
+  [ "$error" ] && echo "$error" | indent
 }
 
 report_correct() {
@@ -19,20 +26,37 @@ report_correct() {
   tput setaf 2;
   echo $test
   tput sgr0
-  [ "$error" ] && echo "  $error"
+  [ "$error" ] && echo "$error" | indent
+}
+
+section() {
+  echo
+  tput setaf 8
+  echo "$@"
+  tput sgr0
 }
 
 incorrect=0
 correct=0
+
+section "Scanner produces expected tokens"
+for test in $(find -name '*.simple' | sort); do
+  error=$(../simple --only-scanner < $test 2>&1 |
+    diff --ignore-space-change - ${test%.simple}.tokens 2>&1)
+  [ "$error" ] && report_incorrect || report_correct
+done > >(indent)
+
+section "Parser accepts valid programs"
 for test in $(find good -name '*.simple' | sort); do
   error=$(../simple < $test 2>&1)
   [ "$error" ] && report_incorrect || report_correct
-done
+done > >(indent)
 
+section "Parser rejects invalid programs"
 for test in $(find bad -name '*.simple' | sort); do
   error=$(../simple < $test 2>&1)
   [ "$error" ] && report_correct || report_incorrect
-done
+done > >(indent)
 
 echo
 if [ $incorrect -gt 0 ]; then
@@ -43,7 +67,7 @@ if [ $incorrect -gt 0 ]; then
   tput sgr0
 else
   echo -n '✓ '
-  tput setaf 1
+  tput setaf 2
   echo -n 'OK'
   tput sgr0
 fi
