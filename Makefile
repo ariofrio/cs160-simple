@@ -12,6 +12,8 @@ TARGET	= simple
 OBJS += lexer.o parser.o main.o 
 RMFILES = core.* lexer.cpp parser.cpp parser.hpp parser.output $(TARGET) $(OBJS)
 
+
+
 # dependencies
 $(TARGET): parser.cpp lexer.cpp parser.hpp $(OBJS)
 	$(CPP) -o $(TARGET) $(OBJS)
@@ -38,5 +40,6 @@ main.o: parser.hpp
 clean:
 	rm -f $(RMFILES)
 
+.DEFAULT_GOAL=test
 test: $(TARGET)
 	@tests/run.sh
