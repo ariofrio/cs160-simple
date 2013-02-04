@@ -39,27 +39,115 @@ int yylex(void);
 
 %%
 
-/* WRITE ME: This is the language from Project 1(Calculator). You need
-             to put the productions for the grammar for the
-             language for this project here*/
-
-List    : List RelExpr ';' {/*Your c code goes here!!!*/}
-        | RelExpr ';'      {/*Your C code goes here!!!*/}
+Program : FunctionDeclarations
         ;
 
-RelExpr : Expr '<' Expr
-        | Expr '>' Expr
-        | Expr '=' Expr
-        | Expr
-        ;
+FunctionDeclarations : FunctionDeclarations FunctionDeclaration
+                     | /* empty */
+                     ;
 
-Expr    : Expr '*' Expr
-        | Expr '+' Expr 
-        | Expr '-' Expr
-        | Expr '/' Expr
-        | 'n'
-        | '(' Expr ')'
-        ;
+FunctionDeclaration : "function" FunctionType IDENTIFIER
+                      '(' ParameterListOrEmpty ')'
+                      '{' FunctionBody '}'
+                    ;
+
+FunctionType : "int"
+             | "bool"
+             ;
+
+ParameterListOrEmpty : ParameterList
+                     | /* empty */
+                     ;
+
+ParameterList : ParameterList ',' Parameter
+              | Parameter
+              ;
+
+Parameter : FunctionType IDENTIFIER
+          ;
+
+FunctionBody : VariableDeclarations FunctionDeclarations
+               Statements ReturnStatement
+             ;
+
+VariableDeclarations : VariableDeclarations VariableDeclaration
+                     | /* empty */
+                     ;
+
+VariableDeclaration : "var" "int" IdentifierList ';'
+                    | "var" "bool" IdentifierList ';'
+                    | "var" "intarray" '[' NUMBER ']' IdentifierList ';'
+
+IdentifierList : IdentifierList ',' IDENTIFIER
+               | IDENTIFIER
+               ;
+
+Statements : Statements Statement
+           | /* empty */
+           ;
+
+Statement : Assignment
+          | FunctionCall
+          | IfStatement
+          | IfElseStatement
+          | WhileStatement
+          ;
+
+Assignment : LeftValue '=' Expression ';'
+           ;
+
+FunctionCall : LeftValue '=' IDENTIFIER '(' ExpressionListOrEmpty ')' ';'
+             ;
+
+ExpressionListOrEmpty : ExpressionList
+                      | /* empty */
+                      ;
+
+ExpressionList : ExpressionList ',' Expression
+               | Expression
+               ;
+
+IfStatement : "if" '(' Expression ')' '{' Statements '}'
+            ;
+
+IfElseStatement : "if" '(' Expression ')' '{' Statements '}'
+                  "else" '{' Statements '}'
+                ;
+
+WhileStatement : "while" '(' Expression ')' '{' Statements '}'
+            ;
+
+ReturnStatement : "return" Expression ';'
+
+Expression : Expression "==" Expression
+           | Expression '>' Expression
+           | Expression ">=" Expression
+           | Expression '<' Expression
+           | Expression "<=" Expression
+           | Expression "!=" Expression
+           | Expression "&&" Expression
+           | Expression "||" Expression
+           | Expression '+' Expression
+           | Expression '-' Expression
+           | Expression '*' Expression
+           | Expression '/' Expression
+           | '-' Expression
+           | '!' Expression
+           | '|' Expression '|'
+           | RightValue
+           | '(' Expression ')'
+           ;
+
+LeftValue : IDENTIFIER
+          | IDENTIFIER '[' Expression ']'
+          ;
+
+RightValue : LeftValue
+           | NUMBER
+           | TRUE
+           | FALSE
+           ;
+
 %%
 
 /*You shouldn't have to do anything past this*/
