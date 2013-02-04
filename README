@@ -3,3 +3,34 @@ you are taking [CS 160][] or a similar compilers course. You have been
 warned.**
 
   [cs 160]: http://www.cs.ucsb.edu/~cs160/
+
+Andres Riofrio <ariofrio@cs.ucsb.edu>
+
+## Changelog
+
+*Add test harness*: Feb 2-3
+
+ - `./simple --only-scanner` outputs a space-separated list of tokens
+ - `make test` compares generated tokens with expected tokens
+ - `make test` ensures parser accepts valid programs (there's no output)
+ - `make test` ensures parser rejects invalid programs (there *is* output)
+ - Added tests for each new feature introduced
+
+*Implement scanner*: Feb 3
+
+ - The rule for octal numbers is above the rule for decimal numbers
+ - Tokens that are not single-character operators get a `%token` declaration in
+   parser.ypp
+ - Used a [start condition][] to implement multi-line, non-greedy comments
+
+  [start condition]: http://flex.sourceforge.net/manual/Start-Conditions.html
+
+*Implement parser*: Feb 3
+
+ - Used left-recursion [for efficiency][recursion]
+ - Use `%left`, `%right`, and `%nonassoc` to disambiguate the grammar according
+   to [this C/C++ precedence table][precedence]
+
+  [recursion]: http://www.gnu.org/software/bison/manual/html_node/Recursion.html
+  [precedence]: http://en.cppreference.com/w/cpp/language/operator_precedence
+
