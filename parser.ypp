@@ -37,6 +37,17 @@ int yylex(void);
 /* WRITE ME: put all your type definitions here*/
 /* WRITE ME: put all your precedence/associativity rules here*/
 
+%left ','
+%nonassoc '='
+%left "||"
+%left "&&"
+%left "==" "!="
+%left '<' '>' "<=" ">="
+%left '+' '-'
+%left '*' '/'
+%right '!'
+
+/* '-', '!', '|' */
 %%
 
 Program : FunctionDeclarations
