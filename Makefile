@@ -42,4 +42,4 @@ clean:
 
 .DEFAULT_GOAL=test
 test: $(TARGET)
-	@tests/run.sh
+	@tests/run.sh $(SIMPLEFLAGS)

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 cd $(dirname $0)
+SIMPLE="../simple $@"
 
 indent() {
   c='s/^/  /'
@@ -41,20 +42,20 @@ correct=0
 
 section "Scanner produces expected tokens"
 for test in $(find -name '*.simple' | sort); do
-  error=$(../simple --only-scanner < $test |&
+  error=$($SIMPLE --only-scanner < $test |&
     diff --ignore-space-change - ${test%.simple}.tokens 2>&1)
   [ "$error" ] && report_incorrect || report_correct
 done > >(indent)
 
 section "Parser accepts valid programs"
 for test in $(find good -name '*.simple' | sort); do
-  error=$(../simple < $test 2>&1)
+  error=$($SIMPLE < $test 2>&1)
   [ "$error" ] && report_incorrect || report_correct
 done > >(indent)
 
 section "Parser rejects invalid programs"
 for test in $(find bad -name '*.simple' | sort); do
-  error=$(../simple < $test 2>&1)
+  error=$($SIMPLE < $test 2>&1)
   [ "$error" ] && report_correct || report_incorrect
 done > >(indent)
 
