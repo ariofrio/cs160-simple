@@ -1,0 +1,1 @@
+function int identifier ( ) { var int identifier ; var bool identifier ; if ( true ) { identifier = number ; } else { identifier = | - number | + - number ; identifier = ! true && false ; } return number ; }

@@ -1,0 +1,1 @@
+function int Main() { var int x; var bool y; if(true) { x=2; } else { x=|-3| + -4; y = !true && false; } return 0; }
