@@ -42,9 +42,12 @@ correct=0
 
 section "Scanner produces expected tokens"
 for test in $(find -name '*.simple' | sort); do
-  error=$($SIMPLE --only-scanner < $test |&
-    diff --ignore-space-change - ${test%.simple}.tokens 2>&1)
-  [ "$error" ] && report_incorrect || report_correct
+  tokens=${test%.simple}.tokens
+  if [ -f $tokens ]; then
+    error=$($SIMPLE --only-scanner < $test |&
+      diff --ignore-space-change - $tokens 2>&1)
+    [ "$error" ] && report_incorrect || report_correct
+  fi
 done > >(indent)
 
 section "Parser accepts valid programs"
