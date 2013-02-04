@@ -8,7 +8,7 @@ Andres Riofrio <ariofrio@cs.ucsb.edu>
 
 ## Changelog
 
-*Add test harness*: Feb 2-3
+**Add test harness**: Feb 2-3
 
  - `./simple --only-scanner` outputs a space-separated list of tokens
  - `make test` compares generated tokens with expected tokens
@@ -16,7 +16,7 @@ Andres Riofrio <ariofrio@cs.ucsb.edu>
  - `make test` ensures parser rejects invalid programs (there *is* output)
  - Added tests for each new feature introduced
 
-*Implement scanner*: Feb 3
+**Implement scanner**: Feb 3
 
  - The rule for octal numbers is above the rule for decimal numbers
  - Tokens that are not single-character operators get a `%token` declaration in
@@ -25,7 +25,7 @@ Andres Riofrio <ariofrio@cs.ucsb.edu>
 
   [start condition]: http://flex.sourceforge.net/manual/Start-Conditions.html
 
-*Implement parser*: Feb 3
+**Implement parser**: Feb 3
 
  - Used left-recursion [for efficiency][recursion]
  - Use `%left`, `%right`, and `%nonassoc` to disambiguate the grammar according
