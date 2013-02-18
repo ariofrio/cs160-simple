@@ -109,7 +109,7 @@ VariableDeclaration : "var" "int" IdentifierList ';'
                       { $$.u_decl = new Decl(new TBool, $3.u_symname_list); }
                     | "var" "intarray" '[' Number ']' IdentifierList ';'
                       { $$.u_decl = new Decl(new TIntArray($4.u_primitive),
-                                             $3.u_symname_list); }
+                                             $6.u_symname_list); }
 
 IdentifierList : IdentifierList ',' Identifier
                 { $1.u_symname_list->push_back($3.u_symname); $$ = $1; }
@@ -213,7 +213,7 @@ Expression : Expression "==" Expression
            | '|' Expression '|'
              { $$.u_expr = new Magnitude($2.u_expr); }
            | RightValue         { $$ = $1; }
-           | '(' Expression ')' { $$ = $1; }
+           | '(' Expression ')' { $$ = $2; }
            ;
 
 
