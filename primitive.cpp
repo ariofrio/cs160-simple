@@ -5,26 +5,26 @@
 
 Primitive::Primitive(int x)
 {
-	m_data = x;
-	m_parent_attribute = NULL;
+  m_data = x;
+  m_parent_attribute = NULL;
 }
 
 Primitive::Primitive(const Primitive & other)
 {
-	m_data = other.m_data;
-	m_parent_attribute = other.m_parent_attribute;
+  m_data = other.m_data;
+  m_parent_attribute = other.m_parent_attribute;
 }
 
 Primitive& Primitive::operator=(const Primitive & other)
 {
-	Primitive tmp(other);
-	swap(tmp);
-	return *this;
+  Primitive tmp(other);
+  swap(tmp);
+  return *this;
 }
 
 void Primitive::swap(Primitive & other)
 {
-	std::swap(m_data, other.m_data);
+  std::swap(m_data, other.m_data);
 }
 
 Primitive::~Primitive()
@@ -33,17 +33,17 @@ Primitive::~Primitive()
 
 void Primitive::accept(Visitor *v)
 { 
-	v->visitPrimitive(this); 
+  v->visitPrimitive(this); 
 }
 
 LatticeElemMap* Primitive::accept(CFVisitor *v, LatticeElemMap *in)
 { 
-	return v->visitPrimitive(this, in); 
+  return v->visitPrimitive(this, in); 
 }
 
 Primitive* Primitive::clone() const
 {
-	return new Primitive(*this);
+  return new Primitive(*this);
 }
 
 
