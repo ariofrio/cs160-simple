@@ -1,9 +1,14 @@
 %{
 	#include <stdio.h>
 	#include <stdlib.h>
-	#include <iostream>
+
+    	#include "ast.hpp"
+    	#include "primitive.hpp"
+    	#include "symtab.hpp"
+
 	#define YYDEBUG 1
 
+    	extern Program_ptr ast;
 	int yylex(void);
 	void yyerror(const char *);
 %}
@@ -11,40 +16,20 @@
 /* Enables verbose error messages */
 %error-verbose
 
-/* WRITE ME: put all your token definitions here*/
-/* WRITE ME: put all your type definitions here*/
-/* WRITE ME: put all your precedence/associativity rules here*/
+
+/* Insert your grammar into below section. Please don't just overwrite the file because of the enhanced header section. */
 
 %%
 
-/* WRITE ME: This is the language from Project 1(Calculator). You need
-			 to put the productions for the grammar for the
-			 language for this project here*/
-			 
-List    : List RelExpr ';' {/*Your c code goes here!!!*/}
-	| RelExpr ';'      {/*Your C code goes here!!!*/}
-        ;
+insertyourgrammarhere   :
+			;
 
-RelExpr : Expr '<' Expr
-        | Expr '>' Expr
-	| Expr '=' Expr
-	| Expr
-	;
-
-Expr    : Expr '*' Expr
-        | Expr '+' Expr 
-        | Expr '-' Expr
-        | Expr '/' Expr
-        | 'n'
-        | '(' Expr ')'
-        ;
 %%
-
-/*You shouldn't have to do anything past this*/
 
 extern int yylineno;
 
 void yyerror(const char *s) {
 	fprintf(stderr, "%s at line %d\n", s, yylineno);
-	exit(0);
+	exit(1);
+	return;
 }
