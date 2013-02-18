@@ -34,3 +34,17 @@ Andres Riofrio <ariofrio@cs.ucsb.edu>
   [recursion]: http://www.gnu.org/software/bison/manual/html_node/Recursion.html
   [precedence]: http://en.cppreference.com/w/cpp/language/operator_precedence
 
+**Implement AST generator**: Feb 17
+
+ - Add harness files from class website
+ - Add actions to parser rules to construct the AST
+ - Separate `Assignment` parser rule into `Assignment` and `ArrayAssignment`;
+   likewise with `FunctionCall`
+ - Add `Identifier` and `Number` parser rules that have an action that creates
+   a `Primitive()` instead of adding the code to create a `Primitive()` every
+   time `IDENTIFIER` and `NUMBER` are used.
+ - Set `yylval` in lexer rules to propagate integer values and symbol names
+ - Check that [each test][] passes (done manually: test harness not updated)
+
+  [each test]: http://www.cs.ucsb.edu/~cs160/projects/proj3samples
+
