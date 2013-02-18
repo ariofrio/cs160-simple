@@ -2,9 +2,16 @@
   #include <stdio.h>
   #include <stdlib.h>
   #include <iostream>
+  #include "ast.hpp"
+  #include "primitive.hpp"
+  #include "symtab.hpp"
   #define YYDEBUG 1
 
-int yylex(void);
+  int yylex(void);
+  void yyerror(const char *);
+
+  extern Program_ptr ast;
+  int yylex(void);
   void yyerror(const char *);
 %}
 
@@ -161,8 +168,6 @@ RightValue : LeftValue
 
 %%
 
-/*You shouldn't have to do anything past this*/
-
 #include <string.h>
 void print_token(int token) {
   if(token < 255) {
@@ -182,5 +187,6 @@ extern int yylineno;
 
 void yyerror(const char *s) {
   fprintf(stderr, "%s at line %d\n", s, yylineno);
-  exit(0);
+	exit(1);
+	return;
 }

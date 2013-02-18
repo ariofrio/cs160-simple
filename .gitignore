@@ -5,3 +5,5 @@ parser.*
 lexer.*
 !lexer.l
 tags
+ast.cpp
+ast.hpp

@@ -4,6 +4,7 @@
 %{
 #include <stdlib.h>
 #include <string.h>
+#include "ast.hpp"
 #include "parser.hpp"
 
 void yyerror(const char *);
@@ -74,3 +75,4 @@ false    { return FALSE;    }
 int yywrap(void) {
   return 1;
 }
+

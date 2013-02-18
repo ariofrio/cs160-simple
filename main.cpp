@@ -1,3 +1,4 @@
+#include "ast.hpp"
 #include "parser.hpp"
 #include <assert.h>
 #include <stdio.h>
@@ -8,6 +9,9 @@ extern int yydebug; // set this to 1 if you want yyparse to dump a trace
 extern int yyparse(); // this actually the parser which then calls the scanner
 extern int yylex();
 extern void print_token(int);
+
+void dopass_ast2dot(Program_ptr ast); /*this is defined in ast2dot.cpp*/
+Program_ptr ast; /* make sure to set this to the final syntax tree in parser.ypp*/
 
 void printUsage(char* command) {
   printf("Usage: %s [--debug] [--only-scanner]\n", command);
@@ -40,6 +44,9 @@ int main(int argc, char** argv) {
     printf("\n");
   } else {
     yyparse();
+ 
+    // walk over the ast and print it out as a dot file
+    if (ast) dopass_ast2dot( ast );
   }
 
   return 0;
