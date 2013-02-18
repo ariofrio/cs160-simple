@@ -57,114 +57,179 @@
 /* '-', '!', '|' */
 %%
 
-Program : FunctionDeclarations
+Program : FunctionDeclarations { ast = new Program($1.u_func_list); }
         ;
 
 FunctionDeclarations : FunctionDeclarations FunctionDeclaration
-                     | /* empty */
+                       { $1.u_func_list->push_back($2.u_func); $$ = $1; }
+                     | { $$.u_func_list = new list<Func_ptr>; }
                      ;
 
-FunctionDeclaration : "function" FunctionType IDENTIFIER
+FunctionDeclaration : "function" FunctionType Identifier
                       '(' ParameterListOrEmpty ')'
                       '{' FunctionBody '}'
+                      { $$.u_func = new Func($2.u_type, $3.u_symname,
+                                             $5.u_param_list,
+                                             $8.u_function_block); }
                     ;
 
-FunctionType : "int"
-             | "bool"
+FunctionType : "int"  { $$.u_type = new TInt;  }
+             | "bool" { $$.u_type = new TBool; }
              ;
 
-ParameterListOrEmpty : ParameterList
-                     | /* empty */
+ParameterListOrEmpty : ParameterList { $$ = $1; }
+                     | { $$.u_param_list = new list<Param_ptr>; }
                      ;
 
 ParameterList : ParameterList ',' Parameter
-              | Parameter
+                { $1.u_param_list->push_back($3.u_param); $$ = $1; }
+              | Parameter { $$.u_param_list = new list<Param_ptr>;
+                            $$.u_param_list->push_back($1.u_param);  }
               ;
 
-Parameter : FunctionType IDENTIFIER
+Parameter : FunctionType Identifier
+            { $$.u_param = new Param($1.u_type, $2.u_symname); }
           ;
 
 FunctionBody : VariableDeclarations FunctionDeclarations
                Statements ReturnStatement
+               { $$.u_function_block = new Function_block(
+                   $1.u_decl_list, $2.u_func_list, $3.u_stat_list, 
+                   $4.u_return); }
              ;
 
 VariableDeclarations : VariableDeclarations VariableDeclaration
-                     | /* empty */
+                       { $1.u_decl_list->push_back($2.u_decl); $$ = $1; }
+                     | { $$.u_decl_list = new list<Decl_ptr>; }
                      ;
 
 VariableDeclaration : "var" "int" IdentifierList ';'
+                      { $$.u_decl = new Decl(new TInt, $3.u_symname_list); }
                     | "var" "bool" IdentifierList ';'
-                    | "var" "intarray" '[' NUMBER ']' IdentifierList ';'
+                      { $$.u_decl = new Decl(new TBool, $3.u_symname_list); }
+                    | "var" "intarray" '[' Number ']' IdentifierList ';'
+                      { $$.u_decl = new Decl(new TIntArray($4.u_primitive),
+                                             $3.u_symname_list); }
 
-IdentifierList : IdentifierList ',' IDENTIFIER
-               | IDENTIFIER
+IdentifierList : IdentifierList ',' Identifier
+                { $1.u_symname_list->push_back($3.u_symname); $$ = $1; }
+               | Identifier { $$.u_symname_list = new list<SymName_ptr>;
+                              $$.u_symname_list->push_back($1.u_symname); }
                ;
 
 Statements : Statements Statement
-           | /* empty */
+             { $1.u_stat_list->push_back($2.u_stat); $$ = $1; }
+           | { $$.u_stat_list = new list<Stat_ptr>; }
            ;
 
-Statement : Assignment
-          | FunctionCall
-          | IfStatement
-          | IfElseStatement
-          | WhileStatement
+Statement : Assignment        { $$ = $1; }
+          | ArrayAssignment   { $$ = $1; }
+          | FunctionCall      { $$ = $1; }
+          | ArrayFunctionCall { $$ = $1; }
+          | IfStatement       { $$ = $1; }
+          | IfElseStatement   { $$ = $1; }
+          | WhileStatement    { $$ = $1; }
           ;
 
-Assignment : LeftValue '=' Expression ';'
+Assignment : Identifier '=' Expression ';'
+             { $$.u_stat = new Assignment($1.u_symname, $3.u_expr); }
            ;
 
-FunctionCall : LeftValue '=' IDENTIFIER '(' ExpressionListOrEmpty ')' ';'
+ArrayAssignment : Identifier '[' Expression ']' '=' Expression ';'
+                 { $$.u_stat = new ArrayAssignment(
+                     $1.u_symname, $3.u_expr, $6.u_expr); }
+                ;
+
+FunctionCall : Identifier '=' Identifier '(' ExpressionListOrEmpty ')' ';'
+               { $$.u_stat = new Call(
+                   $1.u_symname, $3.u_symname, $5.u_expr_list); }
              ;
 
-ExpressionListOrEmpty : ExpressionList
-                      | /* empty */
+ArrayFunctionCall : Identifier '[' Expression ']' '=' 
+                    Identifier '(' ExpressionListOrEmpty ')' ';'
+                    { $$.u_stat = new ArrayCall(
+                        $1.u_symname, $3.u_expr, $6.u_symname,
+                        $8.u_expr_list); }
+                  ;
+
+ExpressionListOrEmpty : ExpressionList { $$ = $1; }
+                      | { $$.u_expr_list = new list<Expr_ptr>; }
                       ;
 
 ExpressionList : ExpressionList ',' Expression
-               | Expression
+                 { $1.u_expr_list->push_back($3.u_expr); $$ = $1; }
+               | Expression { $$.u_expr_list = new list<Expr_ptr>;
+                              $$.u_expr_list->push_back($1.u_expr);  }
                ;
 
 IfStatement : "if" '(' Expression ')' '{' Statements '}'
+              { $$.u_stat = new IfNoElse($3.u_expr,
+                  new Nested_block($6.u_stat_list)); }
             ;
 
 IfElseStatement : "if" '(' Expression ')' '{' Statements '}'
                   "else" '{' Statements '}'
+                  { $$.u_stat = new IfWithElse($3.u_expr,
+                      new Nested_block($6.u_stat_list),
+                      new Nested_block($10.u_stat_list)); }
                 ;
 
 WhileStatement : "while" '(' Expression ')' '{' Statements '}'
-            ;
+                 { $$.u_stat = new WhileLoop($3.u_expr,
+                     new Nested_block($6.u_stat_list)); }
+               ;
 
 ReturnStatement : "return" Expression ';'
+                  { $$.u_return = new Return($2.u_expr); }
 
 Expression : Expression "==" Expression
+             { $$.u_expr = new Compare($1.u_expr, $3.u_expr); }
            | Expression '>' Expression
+             { $$.u_expr = new Gt($1.u_expr, $3.u_expr); }
            | Expression ">=" Expression
+             { $$.u_expr = new Gteq($1.u_expr, $3.u_expr); }
            | Expression '<' Expression
+             { $$.u_expr = new Lt($1.u_expr, $3.u_expr); }
            | Expression "<=" Expression
+             { $$.u_expr = new Lteq($1.u_expr, $3.u_expr); }
            | Expression "!=" Expression
+             { $$.u_expr = new Noteq($1.u_expr, $3.u_expr); }
            | Expression "&&" Expression
+             { $$.u_expr = new And($1.u_expr, $3.u_expr); }
            | Expression "||" Expression
+             { $$.u_expr = new Or($1.u_expr, $3.u_expr); }
            | Expression '+' Expression
+             { $$.u_expr = new Plus($1.u_expr, $3.u_expr); }
            | Expression '-' Expression
+             { $$.u_expr = new Minus($1.u_expr, $3.u_expr); }
            | Expression '*' Expression
+             { $$.u_expr = new Times($1.u_expr, $3.u_expr); }
            | Expression '/' Expression
+             { $$.u_expr = new Div($1.u_expr, $3.u_expr); }
            | '-' Expression
+             { $$.u_expr = new Uminus($2.u_expr); }
            | '!' Expression
+             { $$.u_expr = new Not($2.u_expr); }
            | '|' Expression '|'
-           | RightValue
-           | '(' Expression ')'
+             { $$.u_expr = new Magnitude($2.u_expr); }
+           | RightValue         { $$ = $1; }
+           | '(' Expression ')' { $$ = $1; }
            ;
 
-LeftValue : IDENTIFIER
-          | IDENTIFIER '[' Expression ']'
-          ;
 
-RightValue : LeftValue
-           | NUMBER
-           | TRUE
-           | FALSE
+RightValue : Identifier { $$.u_expr = new Ident($1.u_symname); }
+           | Identifier '[' Expression ']'
+             { $$.u_expr = new ArrayAccess($1.u_symname, $3.u_expr); }
+           | Number { $$.u_expr = new IntLit($1.u_primitive); }
+           | TRUE   { $$.u_expr = new BoolLit(new Primitive(1)); }
+           | FALSE  { $$.u_expr = new BoolLit(new Primitive(0)); }
            ;
+
+Identifier : IDENTIFIER { $$.u_symname = new SymName($1.u_base_charptr); }
+           ;
+
+Number : NUMBER { $$.u_primitive = new Primitive($1.u_base_int); }
+       ;
 
 %%
 

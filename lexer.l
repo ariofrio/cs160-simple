@@ -55,15 +55,22 @@ return   { return RETURN;   }
 &&       { return AND;      }
 \|\|     { return OR;       }
 
-true     { return TRUE;     }
-false    { return FALSE;    }
+true     { return TRUE;  }
+false    { return FALSE; }
 
 [><!\+\-\*\/;,|{}()\[\]=] { return *yytext;    }
-[01]+b                    { return NUMBER;     } /* binary      */
-0[xX][0-9A-F]+            { return NUMBER;     } /* hexadecimal */
-0[0-7]+                   { return NUMBER;     } /* octal       */
-[0-9]+                    { return NUMBER;     } /* decimal     */
-[a-zA-Z][a-zA-Z0-9]*      { return IDENTIFIER; }
+[01]+b                    { yylval.u_base_int = strtol(yytext, NULL, 2);
+                            return NUMBER; /* binary */ }
+0[xX][0-9A-F]+            { yylval.u_base_int = strtol(yytext, NULL, 16);
+                            return NUMBER; /* hexadecimal */ }
+0[0-7]+                   { yylval.u_base_int = strtol(yytext, NULL, 8);
+                            return NUMBER; /* octal */ }
+[0-9]+                    { yylval.u_base_int = strtol(yytext, NULL, 10);
+                            return NUMBER; /* decimal */ }
+[a-zA-Z][a-zA-Z0-9]*      { yylval.u_base_charptr =
+                              (char*) malloc(sizeof(char)*strlen(yytext));
+                            strcpy(yylval.u_base_charptr, yytext); 
+                            return IDENTIFIER; }
 
 [ \t\n]                   ; /* skip whitespace */
 .                         yyerror((char *) "invalid character");
