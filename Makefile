@@ -1,6 +1,3 @@
-#
-# makefile for Project 3
-#
 
 YACC    = bison -d -v
 LEX     = flex
@@ -10,7 +7,7 @@ ASTBUILD = ./astbuilder.gawk
 
 TARGET	= simple
 
-OBJS += lexer.o parser.o main.o ast.o primitive.o  ast2dot.o symtab.o
+OBJS += lexer.o parser.o main.o ast.o primitive.o ast2dot.o symtab.o typecheck.o constantfolding.o
 RMFILES = core.* lexer.cpp parser.cpp parser.hpp parser.output ast.hpp ast.cpp $(TARGET) $(OBJS)
 
 # dependencies
@@ -40,7 +37,7 @@ lexer.cpp: lexer.l
 parser.o: parser.cpp parser.hpp
 parser.cpp: parser.ypp ast.hpp primitive.hpp symtab.hpp
 
-main.o: parser.hpp ast.hpp symtab.hpp primitive.hpp 
+main.o: parser.hpp ast.hpp symtab.hpp primitive.hpp typecheck.cpp constantfolding.cpp
 ast2dot.o: parser.hpp ast.hpp symtab.hpp primitive.hpp attribute.hpp
 
 ast.o: ast.cpp ast.hpp primitive.hpp symtab.hpp attribute.hpp
@@ -48,6 +45,10 @@ ast.cpp: ast.cdef
 ast.hpp: ast.cdef
 
 primitive.o: primitive.hpp primitive.cpp ast.hpp
+
+typecheck.o: typecheck.cpp ast.hpp symtab.hpp primitive.hpp attribute.hpp
+
+constantfolding.o: constantfolding.cpp ast.hpp symtab.hpp primitive.hpp attribute.hpp
 
 clean:
 	rm -f $(RMFILES)

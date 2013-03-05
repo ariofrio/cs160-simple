@@ -3,6 +3,8 @@
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
+#include "attribute.hpp"
+
 
 /****** SymName Implemenation **************************************/
 
@@ -15,7 +17,6 @@ SymName::SymName(char* const x)
 SymName::SymName(const SymName & other)
 {
 	m_spelling = strdup(other.m_spelling);
-	m_parent_attribute = other.m_parent_attribute;
 }
 
 SymName& SymName::operator=(const SymName & other)
@@ -56,7 +57,14 @@ const char* SymName::spelling()
 	return m_spelling;
 }
 
-const Symbol* SymName::symbol()
+const char* SymName::mangled_spelling()
+{
+	if ( !strcmp(m_spelling,"Main") ) return "main";
+	else return m_spelling;
+	//fix me: should handle the name scoping properly
+}
+
+Symbol* SymName::symbol()
 {
 	return m_symbol;
 }
@@ -89,6 +97,7 @@ class SymScope
   list<SymScope*> m_child;
   typedef hash_map<char*, Symbol*, hash<char*>, eqstr> ScopeTableType;
   ScopeTableType m_scopetable;
+  int m_scopesize; 
   SymScope* parent();
   void add_child(SymScope* c);
   SymScope(SymScope * parent);
@@ -110,6 +119,7 @@ class SymScope
   friend class SymTab; //symtab is a wrapper class
 
 };
+
 
 /****** SymTab Implementation **************************************/
 
@@ -142,6 +152,13 @@ void SymTab::close_scope()
 	assert( m_cur_scope != NULL );
 
 	m_cur_scope = m_cur_scope->close_scope();
+}
+
+SymScope* SymTab::get_scope()
+{
+	//check that we actually have a scope before we return it
+	assert( m_cur_scope != NULL ); 
+	return m_cur_scope;
 }
 
 bool SymTab::exist( char* name )
@@ -182,10 +199,47 @@ bool SymTab::insert_in_parent_scope( char* name, Symbol * s )
 
 Symbol* SymTab::lookup( const char * name )
 {
-	assert( name != NULL );
-	return m_cur_scope->lookup( name );
+	return lookup( m_cur_scope, name );
 }
 
+Symbol* SymTab::lookup( SymScope* targetscope, const char * name )
+{
+	assert( name != NULL );
+	assert( targetscope != NULL );
+	Symbol* result = NULL;
+	while (result == NULL && targetscope != NULL)
+	{
+		result = targetscope->lookup( name );
+		targetscope = targetscope->m_parent;
+	}
+	return result;
+}
+
+Symbol* SymTab::lookup_single( const char * name )
+{
+	return lookup_single( m_cur_scope, name );
+}
+
+Symbol* SymTab::lookup_single( SymScope* targetscope, const char * name )
+{
+	assert( name != NULL );
+	assert( targetscope != NULL );
+	return targetscope->lookup( name );
+}
+
+int SymTab::scopesize( SymScope* targetscope )
+{
+	return targetscope->m_scopesize;
+}
+
+int SymTab::lexical_distance( SymScope* higher_scope, SymScope* deeper_scope )
+{
+
+	assert(deeper_scope != NULL);
+	assert(higher_scope != NULL);
+	if( higher_scope == deeper_scope ) return 0;
+	return lexical_distance( higher_scope, deeper_scope->m_parent ) + 1;
+}
 
 void SymTab::dump( FILE* f )
 {
@@ -197,11 +251,13 @@ void SymTab::dump( FILE* f )
 SymScope::SymScope() 
 {
 	m_parent = NULL; 
+	m_scopesize = 0;
 }
 
 SymScope::SymScope(SymScope * parent) 
 {
 	m_parent = parent;
+	m_scopesize = 0;
 	if (parent!=NULL) {
 		parent->add_child(this); 
 	}
@@ -235,21 +291,23 @@ void SymScope::dump(FILE* f, int nest_level)
 {
 	//recursively prints out the symbol table
 	//from the head down through all the childrens
-
 	ScopeTableType::iterator si;
 
 	//indent appropriately
+	fprintf(f,"# ");
 	for( int i=0; i<nest_level; i++ ) { fprintf(f,"\t"); }
-	fprintf(f,"+-- Symbol Scope ---\n");
+	fprintf(f,"+-- Symbol Scope (%d bytes at %p)---\n", m_scopesize, (void*)this );
 
 	for( si = m_scopetable.begin(); si != m_scopetable.end(); ++si )
 	{
 		//indent appropriately
+		fprintf(f,"# ");
 		for( int i=0; i<nest_level; i++ ) { fprintf(f,"\t"); }
-		fprintf( f, "| %s \n", si->first );
+		fprintf( f, "| %s (offset=%d,scope=%p)\n", si->first, si->second->m_offset, (void*)si->second->m_symscope );
 	}
+	fprintf(f,"# ");
 	for( int i=0; i<nest_level; i++ ) { fprintf(f,"\t"); }
-	fprintf(f,"+-------------\n\n");
+	fprintf(f,"+-------------\n#\n");
 
 	//now print all the children
 	list<SymScope*>::iterator li;
@@ -312,6 +370,11 @@ Symbol* SymScope::insert( char* name, Symbol * s )
 	iret = m_scopetable.insert( hpair(name,s) );
 	if( iret.second == true ) {
 		//insert was successfull
+		//update the offset and size
+		s->m_offset = m_scopesize;
+		m_scopesize += s->get_size();
+		//set the scope
+		s->m_symscope = this;
 		return NULL;
 	} else {
 		//cannot insert, there was a duplicate entry
@@ -328,12 +391,7 @@ Symbol* SymScope::lookup( const char * name )
 	if ( i != m_scopetable.end() ) {
 		return i->second;
 	}
-
-	//failing that, check all the parents;
-	if ( m_parent != NULL ) {
-		return m_parent->lookup( name );
-	} else {
-		//if this has no parents, then it cannot be found
-		return NULL;
-	}
+	return NULL;
 }
+
+

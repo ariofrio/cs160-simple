@@ -16,14 +16,9 @@ class Primitive
   Primitive(int x);
   ~Primitive();
   virtual void accept(Visitor *v);
-  virtual LatticeElemMap* accept(CFVisitor *v, LatticeElemMap* in);
+  LatticeElemMap* accept(CFVisitor *v, LatticeElemMap *in);
   virtual Primitive *clone() const;
   void swap(Primitive &);
 };
-
-
-
-
-
 
 #endif //PRIMITIVE_HPP

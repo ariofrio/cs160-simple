@@ -46,6 +46,3 @@ Primitive* Primitive::clone() const
 	return new Primitive(*this);
 }
 
-
-
-

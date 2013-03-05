@@ -111,13 +111,17 @@ func add_header() {
 	Hheader = Hheader "\n//Automatically Generated C++ Abstract Syntax Tree Interface\n\n";
 	Hheader = Hheader "using namespace std;\n";
 	Hheader = Hheader "#include <list>\n";
+	Hheader = Hheader "#include <map>\n";
 	Hheader = Hheader "#include \"attribute.hpp\"\n";
-	Hheader = Hheader "#include \"constantfolding.hpp\"\n";
 
 	Cheader = Cheader "//Automatically Generated C++ Abstract Syntax Tree Class Hierarchy\n\n";
 	Cheader = Cheader "#include <algorithm>\n";
 	Cheader = Cheader "#include \"ast.hpp\"\n";
 	Cheader = Cheader "extern int yylineno;\n";
+	
+#	Hheader = Hheader "\n";
+#	Hheader = Hheader "class LatticeElem;\n";
+#	Hheader = Hheader "typedef map<const char*, LatticeElem, ltstr> LatticeElemMap;\n";
 } 
 
 func add_list(kind) {
@@ -151,11 +155,7 @@ func add_abstract( kind ) {
 
 	Habstract = Habstract "class "get_abstract_name(kind)" : public Visitable {\n";
 	Habstract = Habstract "public:\n";
-	Habstract = Habstract "   Attribute m_attribute;\n";
-	Habstract = Habstract "   Attribute* m_parent_attribute;\n";
-	Habstract = Habstract "   virtual "get_abstract_name(kind) \
-				" *clone() const = 0;\n";
-
+	Habstract = Habstract "  virtual " get_abstract_name(kind) " *clone() const = 0;\n";
 	Habstract = Habstract "};\n\n";
 } 
 
@@ -382,49 +382,10 @@ func add_concrete( kind, instof,   c,i,m,t ) {
 ###############################
 
 func print_all_cpp() {
-
 	print Cheader > outfile;
 	print "\n" >> outfile;
 	print Cconcrete >> outfile;
 	print "\n" >> outfile;
-
-	print "void Visitor::visit(Visitable *p) {" >> outfile;	
-	print "  p -> accept(this);" >> outfile;
-	print "}" >> outfile;
-
-	print "\n" >> outfile;
-
-	print "void Visitor::visit_list(list<Visitable*> *v) {" >> outfile;
-	print "  list<Visitable*>::iterator iter;" >> outfile;
-	print "  for (iter = v->begin(); iter != v->end(); iter++)" >> outfile;
-	print "    visit((*iter));" >> outfile;
-	print "}" >> outfile;
-
-	print "\n" >> outfile;
-
-	print "void Visitor::visit_children_of(Visitable *p) {" >> outfile;	
-	print "  p -> visit_children(this);" >> outfile;
-	print "}" >> outfile;
-	
-	
-	print "LatticeElemMap* CFVisitor::visit(Visitable *p, LatticeElemMap *in) {" >> outfile;	
-	print "  return p -> accept(this, in);" >> outfile;
-	print "}" >> outfile;
-
-	print "\n" >> outfile;
-
-	print "LatticeElemMap* CFVisitor::visit_list(list<Visitable*> *v, LatticeElemMap *in) {" >> outfile;
-	print "  list<Visitable*>::iterator iter;" >> outfile;
-	print "  for (iter = v->begin(); iter != v->end(); iter++)" >> outfile;
-	print "    in = visit(*iter, in);" >> outfile;
-	print "  return in;" >> outfile;
-	print "}" >> outfile;
-
-	print "\n" >> outfile;
-
-	print "LatticeElemMap* CFVisitor::visit_children_of(Visitable *p, LatticeElemMap *in) {" >> outfile;	
-	print "  return p -> visit_children(this, in);" >> outfile;
-	print "}" >> outfile;
 }
 
 func print_all_h() {
@@ -452,38 +413,65 @@ func print_all_h() {
 	print "int u_base_int;" >> outfile;
 	print "} classunion_stype;" >> outfile;
 	print "#define YYSTYPE classunion_stype" >> outfile;
+	
+	print "\n" >> outfile;
+	print "class Visitor;\n" >> outfile;
+	print "class CFVisitor;\n" >> outfile;
+	print "\n" >> outfile;
+
+	print "class Visitable" >> outfile;
+	print "{" >> outfile;
+	print " public:" >> outfile;
+	print "  Attribute m_attribute;\n" >> outfile;
+	print "  Attribute* m_parent_attribute;\n" >> outfile;
+	print "  virtual ~Visitable() {}" >> outfile;
+	print "  virtual void visit_children(Visitor *v) = 0;" >> outfile;
+	print "  virtual void accept(Visitor *v) = 0;" >> outfile;
+	print "  virtual LatticeElemMap* visit_children(CFVisitor *v, LatticeElemMap *in) = 0;" >> outfile;
+	print "  virtual LatticeElemMap* accept(CFVisitor *v, LatticeElemMap *in) = 0;" >> outfile;
+	print "};\n" >> outfile;
 
 	print "\n/********** Visitor Interfaces **********/\n" >> outfile;
-	print "class Visitable;\n" >> outfile;
-	print "\n" >> outfile;
 	print "class Visitor {" >> outfile;
 	print " public:" >> outfile;
 	print "  virtual ~Visitor() {}" >> outfile;
 	print Hvisitor >> outfile;
-	print "  void visit(Visitable *p);" >> outfile;
-	print "  void visit_list(list<Visitable*> *v);" >> outfile;
-	print "  void visit_children_of(Visitable* p);" >> outfile;
+	print "  void visit(Visitable *p) {" >> outfile;
+	print "    p -> accept(this);" >> outfile;
+	print "  }" >> outfile;
+	print "\n" >> outfile;
+	print "  template<class T>" >> outfile;
+	print "  void visit_list(list<T*> *v) {" >> outfile;
+	print "    typename list<T*>::iterator iter;" >> outfile;
+	print "    for (iter = v->begin(); iter != v->end(); iter++)" >> outfile;
+	print "      visit((*iter));" >> outfile;
+	print "  }" >> outfile;
+	print "\n" >> outfile;
+	print "  void visit_children_of(Visitable* p) {" >> outfile;
+	print "    p -> visit_children(this);" >> outfile;
+	print "  }" >> outfile;
 	print "};\n" >> outfile;
-
 	
 	print "\n/********** CFVisitor Interfaces **********/\n" >> outfile;
 	print "class CFVisitor {" >> outfile;
 	print " public:" >> outfile;
 	print "  virtual ~CFVisitor() {}" >> outfile;
 	print HCFvisitor >> outfile;
-	print "  LatticeElemMap* visit(Visitable *p, LatticeElemMap* in);" >> outfile;
-	print "  LatticeElemMap* visit_list(list<Visitable*> *v, LatticeElemMap *in);" >> outfile;
-	print "  LatticeElemMap* visit_children_of(Visitable* p, LatticeElemMap *in);" >> outfile;
-	print "};\n" >> outfile;
-
-	print "class Visitable" >> outfile;
-	print "{" >> outfile;
-	print " public:" >> outfile;
-	print "  virtual ~Visitable() {}" >> outfile;
-	print "  virtual void visit_children(Visitor *v) = 0;" >> outfile;
-	print "  virtual void accept(Visitor *v) = 0;" >> outfile;
-	print "  virtual LatticeElemMap* visit_children(CFVisitor *v, LatticeElemMap *in) = 0;" >> outfile;
-	print "  virtual LatticeElemMap* accept(CFVisitor *v, LatticeElemMap *in) = 0;" >> outfile;
+	print "  LatticeElemMap* visit(Visitable *p, LatticeElemMap *in) {" >> outfile;
+	print "    return p -> accept(this, in);" >> outfile;
+	print "  }" >> outfile;
+	print "\n" >> outfile;
+	print "  template<class T>" >> outfile;
+	print "  LatticeElemMap* visit_list(list<T*> *v, LatticeElemMap *in) {" >> outfile;
+	print "    typename list<T*>::iterator iter;" >> outfile;
+	print "    for (iter = v->begin(); iter != v->end(); iter++)" >> outfile;
+	print "      in = visit(*iter, in);" >> outfile;
+	print "    return in;" >> outfile;
+	print "  }" >> outfile;
+	print "\n" >> outfile;
+	print "  LatticeElemMap* visit_children_of(Visitable* p, LatticeElemMap *in) {" >> outfile;
+	print "    return p -> visit_children(this, in);" >> outfile;
+	print "  }" >> outfile;
 	print "};\n" >> outfile;
 	
 

@@ -3,15 +3,16 @@
 
 #include "ast.hpp"
 #include "attribute.hpp"
+#include <assert.h>
 #include <vector>
+#include <string.h>
 #include <ext/hash_map>
-//#include <ext/stl_hash_fun.h>
 
 using namespace std;
 using namespace __gnu_cxx;
 
 class Symbol;
-class SymName 
+class SymName : public Visitable 
 {
   char* m_spelling; // "name" of the symbol
   Symbol* m_symbol; // pointer to the symbol for this name
@@ -24,21 +25,36 @@ class SymName
   ~SymName();
   virtual void accept(Visitor *v);
   virtual LatticeElemMap* accept(CFVisitor *v, LatticeElemMap *in);
+  void visit_children(Visitor *v) { }
+  LatticeElemMap* visit_children(CFVisitor *v, LatticeElemMap *in) { return in; }
   virtual SymName *clone() const;
   void swap(SymName &);
 
   const char* spelling();
-  const Symbol* symbol();
+  const char* mangled_spelling();
+  Symbol* symbol();
   void set_symbol( Symbol* symbol );
 
-  Attribute* m_parent_attribute;
+  Attribute* m_parent_attribute; // pointer to the attribute of the parent of this node
 };
+
+// this is one-level of scope for the SymTab
+// it is not defined in the hpp file because it 
+// is only used internally in the implementation of SymTab.
+// Pointers to SymScope are used to point to an internal
+// part of a SymTab and are returned by get_scope and 
+// queried with lookup.
+class SymScope;
 
 // this is where the symbol infromation is actually stored.
 // details of the symbol including it's type, parameters, etc.
 // can be kept in this class
 class Symbol
 {
+  private:
+
+  int m_offset;
+  SymScope* m_symscope;
 
   public:
 
@@ -48,18 +64,44 @@ class Symbol
   //valid for all types
   Basetype m_basetype;
 
-  //these are valid only if they are procedures
+  //these are valid only if they are functions
   vector<Basetype> m_arg_type;
+  Basetype m_return_type;
 
-  Symbol() { m_basetype=bt_undef; }
+  //WRITEME: add string size information
+
+  Symbol() { 
+	m_offset = -1;
+	m_symscope = NULL;
+	m_basetype=bt_undef;
+  }
+
+  int get_size() { 
+	switch (m_basetype)
+	{
+	  case bt_integer:         return(4); 
+	  case bt_boolean:         return(4);
+	  case bt_function:        return(0);
+	  case bt_intarray:        return(0);
+	  case bt_undef: 
+	  default: assert(0);
+
+	  //WRITEME: add intarray size calc and assert size != 0 
+
+	}
+  }
+
+  //if either of these assert fails, you tried to get 
+  //a variable that was not set (which means it was
+  //not inserted properly into the symbol table)
+  int get_offset() { assert(m_offset>=0); return m_offset; }
+  SymScope* get_scope() { assert(m_symscope!=NULL); return m_symscope; }
+  friend class SymScope;
+  friend class SymTab;
+
   ~Symbol() { }
 };
 
-
-// this is one-level of scope for the SymTab
-// it is not defined in the hpp file because it 
-// is only used in the implementation of SymTab
-class SymScope;
 
 // This is the symbol table header which is similar
 // to the interface described in class.  There is a
@@ -82,6 +124,10 @@ class SymTab
   void open_scope();
   void close_scope();
 
+  //return the current scope so that we can search
+  //within that scope later
+  SymScope* get_scope();
+
   //returns true if name is found in the current SymTab
   //or any of the parents
   bool exist( char* name );
@@ -98,9 +144,32 @@ class SymTab
   //(it will have an assert failure if there is no parent scope)
   bool insert_in_parent_scope( char* name, Symbol * s ); 
 
-  //tries to locate name in the current SymTab and all
-  //of the parent SymTabs
+  //tries to locate name in the current scope and all
+  //of the parent scopes
   Symbol* lookup( const char * name ); 
+
+  //tries to locate name in the specified target scope
+  //and all of the parent scopes.  
+  Symbol* lookup( SymScope *targetscope, const char * name );
+
+  //lookups the name only in the given scope, not looking at
+  //the parent scopes
+  Symbol* lookup_single( const char * name );
+
+  //lookups the name only in the given scope, not looking at
+  //the parent scopes
+  Symbol* lookup_single( SymScope *scope, const char * name );
+  
+  //returns the size of the targetscope (in bytes)
+  //in terms of the total amount of space that would be 
+  //required to store all the variables in that scope
+  int scopesize( SymScope *targetscope ); 
+
+  //returns the lexical distantance between deeper_scope and higher_scope.
+  //the lexical depth is the levels of nesting between the two (if there
+  //are in the same nest then the distance is 0).  If deeper_scope
+  //is not _nested_inside_ the higher_scope as assertion will fail
+  int lexical_distance( SymScope* higher_scope, SymScope* deeper_scope );
 
   //dump the contents of the symbol table to the file
   //descriptor provided.  very useful for debugging
@@ -128,8 +197,8 @@ class SymTab
 *	// each entry also needs a pointer to a symbol.
 *	// don't need to be uniqe, multiple
 *	// enties might point to the same symbol
-*	Symbol* foo_s = new Symbol(foo_string);
-*	Symbol* bar_s = new Symbol(bar_string);
+*	Symbol* foo_s = new Symbol();
+*	Symbol* bar_s = new Symbol();
 *
 *	bool is_inserted;
 *	is_inserted = st.insert( foo_string, foo_s );
