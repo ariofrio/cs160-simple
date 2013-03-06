@@ -4,3 +4,5 @@ parser.*
 !parser.ypp
 lexer.*
 !lexer.l
+ast.cpp
+ast.hpp
