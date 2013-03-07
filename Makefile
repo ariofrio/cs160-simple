@@ -58,3 +58,7 @@ clean:
 .DEFAULT_GOAL=test
 test: $(TARGET)
 	@tests/run.sh $(SIMPLEFLAGS)
+
+.PHONY: tags
+tags:
+	make $(TARGET); ctags --c++-kinds=+p --fields=+iaS --extra=+q *
