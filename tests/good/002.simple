@@ -1,0 +1,11 @@
+[$ apparently-nested [$ comments $]
+
+function int Main() {
+  [$ another comment $]
+  var int x;
+  [$ comments can be
+  multline like in C $]
+  var int y;
+  [$ comments should be humble $] var int z; [$ not greedy $]
+  return 0;
+}

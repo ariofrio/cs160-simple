@@ -78,11 +78,11 @@ class Attribute
   LatticeElem m_lattice_elem; //the value of this expression; only to be used for expression nodes
 
   Attribute() { 
-	m_basetype = bt_undef;
-	lineno = 0;
-	m_scope = NULL;
-	m_lattice_elem.value = BOTTOM;
-	int m_place = -1; //should never actually be negative
+    m_basetype = bt_undef;
+    lineno = 0;
+    m_scope = NULL;
+    m_lattice_elem.value = BOTTOM;
+    int m_place = -1; //should never actually be negative
   }
 };
 

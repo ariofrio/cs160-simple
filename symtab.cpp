@@ -10,8 +10,8 @@
 
 SymName::SymName(char* const x)
 {
-	m_spelling = x;
-	m_parent_attribute = NULL;
+  m_spelling = x;
+  m_parent_attribute = NULL;
 }
 
 SymName::SymName(const SymName & other)
@@ -21,40 +21,40 @@ SymName::SymName(const SymName & other)
 
 SymName& SymName::operator=(const SymName & other)
 {
-	delete m_spelling;
-	SymName tmp(other);
-	swap(tmp);
-	return *this;
+  delete m_spelling;
+  SymName tmp(other);
+  swap(tmp);
+  return *this;
 }
 
 void SymName::swap(SymName & other)
 {
-	std::swap(m_spelling, other.m_spelling);
+  std::swap(m_spelling, other.m_spelling);
 }
 
 SymName::~SymName()
 {
-	delete( m_spelling );
+  delete( m_spelling );
 }
 
 void SymName::accept(Visitor *v)
 { 
-	v->visitSymName(this); 
+  v->visitSymName(this); 
 }
 
 LatticeElemMap* SymName::accept(CFVisitor *v, LatticeElemMap *in)
 { 
-	return v->visitSymName(this, in); 
+  return v->visitSymName(this, in); 
 }
 
 SymName* SymName::clone() const
 {
-	return new SymName(*this);
+  return new SymName(*this);
 }
 
 const char* SymName::spelling()
 {
-	return m_spelling;
+  return m_spelling;
 }
 
 const char* SymName::mangled_spelling()
@@ -66,17 +66,17 @@ const char* SymName::mangled_spelling()
 
 Symbol* SymName::symbol()
 {
-	return m_symbol;
+  return m_symbol;
 }
 
 void SymName::set_symbol(Symbol* s)
 {
-	//you should not try to reset a symbol pointer
-	//once it is set, that pointer is used all 
-	//sorts of places - changes to it once it is
-	//set can results in weird behavior
-	assert( m_symbol == NULL );
-	m_symbol = s;
+  //you should not try to reset a symbol pointer
+  //once it is set, that pointer is used all 
+  //sorts of places - changes to it once it is
+  //set can results in weird behavior
+  assert( m_symbol == NULL );
+  m_symbol = s;
 }
 
 
@@ -84,8 +84,8 @@ void SymName::set_symbol(Symbol* s)
 
 //comparison structure for strings
 struct eqstr { 
-	bool operator()(const char* s1, const char* s2) const 
-  	{ return strcmp(s1, s2) == 0; }
+  bool operator()(const char* s1, const char* s2) const 
+  { return strcmp(s1, s2) == 0; }
 };
 
 
@@ -113,10 +113,10 @@ class SymScope
 
   public:
 
-  SymScope();
-  ~SymScope();
+    SymScope();
+    ~SymScope();
 
-  friend class SymTab; //symtab is a wrapper class
+    friend class SymTab; //symtab is a wrapper class
 
 };
 
@@ -125,33 +125,33 @@ class SymScope
 
 SymTab::SymTab()
 {
-	m_head = new SymScope;
-	m_cur_scope = m_head;
+  m_head = new SymScope;
+  m_cur_scope = m_head;
 }
 
 SymTab::~SymTab()
 {
-	delete m_head;
+  delete m_head;
 }
 
 bool SymTab::is_dup_string(char* name)
 {
-	return m_head->is_dup_string(name);
+  return m_head->is_dup_string(name);
 }
 
 void SymTab::open_scope()
 {
-	m_cur_scope = m_cur_scope->open_scope();
-	assert( m_cur_scope != NULL );
+  m_cur_scope = m_cur_scope->open_scope();
+  assert( m_cur_scope != NULL );
 }
 
 void SymTab::close_scope()
 {
-	//check to make sure we don't pop more than we push
-	assert( m_cur_scope != m_head ); 
-	assert( m_cur_scope != NULL );
+  //check to make sure we don't pop more than we push
+  assert( m_cur_scope != m_head ); 
+  assert( m_cur_scope != NULL );
 
-	m_cur_scope = m_cur_scope->close_scope();
+  m_cur_scope = m_cur_scope->close_scope();
 }
 
 SymScope* SymTab::get_scope()
@@ -163,38 +163,38 @@ SymScope* SymTab::get_scope()
 
 bool SymTab::exist( char* name )
 {
-	assert( name != NULL );
-	return m_cur_scope->exist( name );
+  assert( name != NULL );
+  return m_cur_scope->exist( name );
 }
 
 bool SymTab::insert( char* name, Symbol * s )
 {
-	assert( name != NULL );
-	assert( s != NULL );
-	// the assert below fails, it is because you tried to insert
-	// a pointer to a string that is already in the SymTab.  You 
-	// can have duplicate names, but each needs to reside it it's
-	// own chunk of memory (see example)
-	assert( is_dup_string(name) ); 
-	Symbol* r = m_cur_scope->insert( name, s );
-	if ( r == NULL ) return true;
-	else return false;
+  assert( name != NULL );
+  assert( s != NULL );
+  // the assert below fails, it is because you tried to insert
+  // a pointer to a string that is already in the SymTab.  You 
+  // can have duplicate names, but each needs to reside it it's
+  // own chunk of memory (see example)
+  assert( is_dup_string(name) ); 
+  Symbol* r = m_cur_scope->insert( name, s );
+  if ( r == NULL ) return true;
+  else return false;
 }
 
 bool SymTab::insert_in_parent_scope( char* name, Symbol * s )
 {
-	assert( name != NULL );
-	assert( s != NULL );
-	// the assert below fails, it is because you tried to insert
-	// a pointer to a string that is already in the SymTab.  You 
-	// can have duplicate names, but each needs to reside it it's
-	// own chunk of memory (see example)
-	assert( is_dup_string(name) ); 
-	// make sure there is an actual parent scope
-	assert( m_cur_scope->m_parent != NULL );	
-	Symbol* r = m_cur_scope->m_parent->insert( name, s );
-	if ( r == NULL ) return true;
-	else return false;
+  assert( name != NULL );
+  assert( s != NULL );
+  // the assert below fails, it is because you tried to insert
+  // a pointer to a string that is already in the SymTab.  You 
+  // can have duplicate names, but each needs to reside it it's
+  // own chunk of memory (see example)
+  assert( is_dup_string(name) ); 
+  // make sure there is an actual parent scope
+  assert( m_cur_scope->m_parent != NULL );	
+  Symbol* r = m_cur_scope->m_parent->insert( name, s );
+  if ( r == NULL ) return true;
+  else return false;
 }
 
 Symbol* SymTab::lookup( const char * name )
@@ -243,7 +243,7 @@ int SymTab::lexical_distance( SymScope* higher_scope, SymScope* deeper_scope )
 
 void SymTab::dump( FILE* f )
 {
-	m_head->dump(f, 0);
+  m_head->dump(f, 0);
 }
 
 /****** SymScope Implementation **************************************/
@@ -265,26 +265,26 @@ SymScope::SymScope(SymScope * parent)
 
 SymScope::~SymScope()
 {
-	//delete the keys, but not the symbols (symbols are linked elsewhere)
-	ScopeTableType::iterator si, this_si;
+  //delete the keys, but not the symbols (symbols are linked elsewhere)
+  ScopeTableType::iterator si, this_si;
 
-	si = m_scopetable.begin();
-	while ( si!=m_scopetable.end() )
-	{
-		char* oldkey = si->first;
-		this_si = si;
-		++si;
+  si = m_scopetable.begin();
+  while ( si!=m_scopetable.end() )
+  {
+    char* oldkey = si->first;
+    this_si = si;
+    ++si;
 
-		m_scopetable.erase( this_si );
-		free( oldkey );
-	}
+    m_scopetable.erase( this_si );
+    free( oldkey );
+  }
 
-	//now delete all the children
-	list<SymScope*>::iterator li;
-	for( li=m_child.begin(); li!=m_child.end(); ++li )
-	{
-		delete *li;
-	}
+  //now delete all the children
+  list<SymScope*>::iterator li;
+  for( li=m_child.begin(); li!=m_child.end(); ++li )
+  {
+    delete *li;
+  }
 }
 
 void SymScope::dump(FILE* f, int nest_level)
@@ -319,48 +319,48 @@ void SymScope::dump(FILE* f, int nest_level)
 
 bool SymScope::is_dup_string(char* name)
 {
-	ScopeTableType::iterator si;
+  ScopeTableType::iterator si;
 
-	si = m_scopetable.find( name );
-	if ( si != m_scopetable.end() ) {
-		//check if the pointers match
-		if ( si->first == name ) return false;
-	}
+  si = m_scopetable.find( name );
+  if ( si != m_scopetable.end() ) {
+    //check if the pointers match
+    if ( si->first == name ) return false;
+  }
 
-	list<SymScope*>::iterator li;
-	for( li=m_child.begin(); li!=m_child.end(); ++li )
-	{
-		bool r = (*li)->is_dup_string(name);
-		if ( r==false ) return false;
-	}
+  list<SymScope*>::iterator li;
+  for( li=m_child.begin(); li!=m_child.end(); ++li )
+  {
+    bool r = (*li)->is_dup_string(name);
+    if ( r==false ) return false;
+  }
 
-	//if it gets this far, there is no duplicate
-	return true;
+  //if it gets this far, there is no duplicate
+  return true;
 }
 
 void SymScope::add_child(SymScope* c) 
 {
-	m_child.push_back(c);
+  m_child.push_back(c);
 }
 
 
 SymScope* SymScope::open_scope() 
 {
-	return new SymScope(this);
+  return new SymScope(this);
 }
 
 SymScope* SymScope::close_scope()
 {
-	return m_parent;
+  return m_parent;
 }
 
 bool SymScope::exist( char* name )
 {
-	Symbol* s;
-	s = lookup(name);
-	// return true if name exists
-	if ( s!=NULL ) return true;
-	else return false;
+  Symbol* s;
+  s = lookup(name);
+  // return true if name exists
+  if ( s!=NULL ) return true;
+  else return false;
 }
 
 Symbol* SymScope::insert( char* name, Symbol * s )

@@ -1,0 +1,9 @@
+
+function int first(intarray list) {
+  return list[0];
+}
+
+function int Main() {
+  return 0;
+}
+

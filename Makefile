@@ -10,6 +10,8 @@ TARGET	= simple
 OBJS += lexer.o parser.o main.o ast.o primitive.o ast2dot.o symtab.o typecheck.o constantfolding.o
 RMFILES = core.* lexer.cpp parser.cpp parser.hpp parser.output ast.hpp ast.cpp $(TARGET) $(OBJS)
 
+
+
 # dependencies
 $(TARGET): parser.cpp lexer.cpp parser.hpp $(OBJS)
 	$(CPP) -o $(TARGET) $(OBJS)
@@ -52,3 +54,7 @@ constantfolding.o: constantfolding.cpp ast.hpp symtab.hpp primitive.hpp attribut
 
 clean:
 	rm -f $(RMFILES)
+
+.DEFAULT_GOAL=test
+test: $(TARGET)
+	@tests/run.sh $(SIMPLEFLAGS)

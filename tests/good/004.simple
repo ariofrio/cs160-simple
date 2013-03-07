@@ -1,0 +1,10 @@
+function int Main() {
+  function int a() {
+    function int b() {
+      return 0;
+    }
+    return 0;
+  }
+  return 0;
+}
+

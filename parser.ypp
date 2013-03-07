@@ -1,20 +1,17 @@
 %{
-	#include <stdio.h>
-	#include <stdlib.h>
-
-    	#include "ast.hpp"
-    	#include "primitive.hpp"
-    	#include "symtab.hpp"
-
+  #include <stdio.h>
+  #include <stdlib.h>
+  #include "ast.hpp"
+  #include "primitive.hpp"
+  #include "symtab.hpp"
 	#define YYDEBUG 1
 
-    	extern Program_ptr ast;
-	int yylex(void);
-	void yyerror(const char *);
-	
+  extern Program_ptr ast;
+  int yylex(void);
+  void yyerror(const char *);
+
 %}
 
-/* Enables verbose error messages */
 %error-verbose
 
 %token SEMI COMMA CURLY_O CURLY_C PAREN_O PAREN_C ANGLE_O ANGLE_C BAR
