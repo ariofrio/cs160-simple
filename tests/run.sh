@@ -53,13 +53,13 @@ skipped=0
 
 section "Parser rejects invalid programs"
 for test in $(find bad -name '*.simple' | sort); do
-  error=$($SIMPLE < $test 2>&1)
+  error=$(bash -c "$SIMPLE < $test" 2>&1)
   [ "$error" ] && report_correct || report_incorrect
 done > >(indent)
 
 section "Parser accepts valid programs"
 for test in $(find good -name '*.simple' | sort); do
-  error=$($SIMPLE < $test 2>&1 1>/dev/null)
+  error=$(bash -c "$SIMPLE < $test" 2>&1 1>/dev/null)
   [ "$error" ] && report_incorrect || report_correct
 done > >(indent)
 
@@ -68,7 +68,7 @@ for test in $(find good -name '*.simple' | sort); do
   dotfile=${test%.simple}.dot
   if [ -f $dotfile ]; then
     tempfile=$(mktemp)
-    error=$($SIMPLE < $test 2>&1 > $tempfile)
+    error=$(bash -c "$SIMPLE < $test" 2>&1 > $tempfile)
     if [ "$error" ]; then
       error=
       report_skipped
