@@ -21,6 +21,16 @@ report_incorrect() {
   [ "$error" ] && echo "$error" | indent
 }
 
+report_skipped() {
+  skipped=$((skipped + 1))
+  tput setaf 3; tput bold
+  echo -n '- '
+  tput sgr0; tput setaf 3
+  echo $test
+  tput sgr0
+  [ "$error" ] && echo "$error" | indent
+}
+
 report_correct() {
   correct=$((correct + 1))
   echo -n '✓ '
@@ -39,12 +49,7 @@ section() {
 
 incorrect=0
 correct=0
-
-section "Parser accepts valid programs"
-for test in $(find good -name '*.simple' | sort); do
-  error=$($SIMPLE < $test 2>&1)
-  [ "$error" ] && report_incorrect || report_correct
-done > >(indent)
+skipped=0
 
 section "Parser rejects invalid programs"
 for test in $(find bad -name '*.simple' | sort); do
@@ -52,8 +57,31 @@ for test in $(find bad -name '*.simple' | sort); do
   [ "$error" ] && report_correct || report_incorrect
 done > >(indent)
 
+section "Parser accepts valid programs"
+for test in $(find good -name '*.simple' | sort); do
+  error=$($SIMPLE < $test 2>&1 1>/dev/null)
+  [ "$error" ] && report_incorrect || report_correct
+done > >(indent)
+
+section "Parser correctly constructs an AST for valid programs"
+for test in $(find good -name '*.simple' | sort); do
+  dotfile=${test%.simple}.dot
+  if [ -f $dotfile ]; then
+    tempfile=$(mktemp)
+    error=$($SIMPLE < $test 2>&1 > $tempfile)
+    if [ "$error" ]; then
+      error=
+      report_skipped
+    else
+      diff $tempfile $dotfile &> /dev/null && report_correct || report_incorrect
+      colordiff $tempfile $dotfile
+    fi
+    rm $tempfile
+  fi
+done > >(indent)
+
 echo
-if [ $incorrect -gt 0 ]; then
+if [ $incorrect -gt 0 ] || [ $skipped -gt 0 ]; then
   tput setaf 1; tput bold
   echo -n '✘ '
   tput sgr0; tput setaf 1
@@ -78,5 +106,11 @@ if [ $incorrect -gt 0 ]; then
   echo -n $incorrect
   tput sgr0
   echo -n ' incorrect '
+fi
+if [ $skipped -gt 0 ]; then
+  tput bold
+  echo -n $skipped
+  tput sgr0
+  echo -n ' skipped '
 fi
 echo
