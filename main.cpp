@@ -11,19 +11,17 @@ extern int yyparse(); // this actually the parser which then calls the scanner
 void dopass_ast2dot(Program_ptr ast); /*this is defined in ast2dot.cpp*/
 
 void dopass_typecheck(Program_ptr ast, SymTab* st) {
-        Typecheck* typecheck = new Typecheck(stderr, st); //create the visitor
-        ast->accept(typecheck); //walk the tree with the visitor above
-	delete typecheck;
-
+  Typecheck* typecheck = new Typecheck(stderr, st); //create the visitor
+  ast->accept(typecheck); //walk the tree with the visitor above
+  delete typecheck;
 }
 
 void dopass_constantfolding(Program_ptr ast, SymTab* st) {
-        ConstantFolding* constant_folding = new ConstantFolding(stderr, st); //create the visitor
-	LatticeElemMap *map = new LatticeElemMap();
-        map = ast->accept(constant_folding, map); //walk the tree with the visitor above
-	delete map;
-	delete constant_folding;
-
+  ConstantFolding* constant_folding = new ConstantFolding(stderr, st); //create the visitor
+  LatticeElemMap *map = new LatticeElemMap();
+  map = ast->accept(constant_folding, map); //walk the tree with the visitor above
+  delete map;
+  delete constant_folding;
 }
 
 Program_ptr ast; /* make sure to set this to the final syntax tree in parser.ypp*/
@@ -33,7 +31,7 @@ void printUsage(char* command) {
 }
 
 int main(int argc, char** argv) {
-	SymTab st; //symbol table
+  SymTab st; //symbol table
 
   static struct option long_options[] = {
     {"debug", no_argument, 0, 'd'},
