@@ -53,7 +53,7 @@ skipped=0
 
 section "Parser rejects invalid programs"
 for test in $(find bad -name '*.simple' | sort); do
-  error=$(bash -c "$SIMPLE < $test" 2>&1)
+  error=$(bash -c "$SIMPLE < $test" 2>&1 1>/dev/null)
   [ "$error" ] && report_correct || report_incorrect
 done > >(indent)
 
@@ -74,7 +74,7 @@ for test in $(find good -name '*.simple' | sort); do
       report_skipped
     else
       diff $tempfile $dotfile &> /dev/null && report_correct || report_incorrect
-      colordiff $tempfile $dotfile
+      colordiff $tempfile $dotfile | indent
     fi
     rm $tempfile
   fi

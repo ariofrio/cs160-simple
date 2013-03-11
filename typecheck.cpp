@@ -197,9 +197,35 @@ class Typecheck : public Visitor {
       Symbol* symbol = m_st->lookup(name);
       if(symbol == NULL)
         t_error(sym_name_undef, m_attribute);
-      if(symbol->m_basetype & accepted_types)
+      if(!(symbol->m_basetype & accepted_types))
         t_error(sym_type_mismatch, m_attribute);
       return symbol->m_basetype;
+    }
+
+    template <class exprType>
+    void propagate_unary_expr(exprType* p, Basetype type) {
+      if(p->m_expr->m_attribute.m_basetype != type)
+        t_error(expr_type_err, p->m_attribute);
+      p->m_attribute.m_basetype = type;
+    }
+
+    template <class exprType>
+    void propagate_binary_expr(exprType* p, Basetype type) {
+      propagate_binary_expr(p, type, type, type);
+    }
+
+    template <class exprType>
+    void propagate_binary_expr(exprType* p, Basetype type, Basetype return_type) {
+      propagate_binary_expr(p, type, type, return_type);
+    }
+
+    template <class exprType>
+    void propagate_binary_expr(exprType* p, Basetype type_1, Basetype type_2, Basetype return_type) {
+      if(p->m_expr_1->m_attribute.m_basetype != type_1)
+        t_error(expr_type_err, p->m_attribute);
+      if(p->m_expr_2->m_attribute.m_basetype != type_2)
+        t_error(expr_type_err, p->m_attribute);
+      p->m_attribute.m_basetype = return_type;
     }
 
   public:
@@ -417,97 +443,122 @@ class Typecheck : public Visitor {
     void visitAnd(And * p)
     {
       set_scope_and_descend_into_children(p);
-      // WRITEME
+      propagate_binary_expr(p, bt_boolean);
+      // DONE
     }
 
     void visitDiv(Div * p)
     {
       set_scope_and_descend_into_children(p);
-      // WRITEME
+      propagate_binary_expr(p, bt_integer);
+      // DONE
     }
 
     void visitCompare(Compare * p)
     {
       set_scope_and_descend_into_children(p);
-      // WRITEME
+      if(p->m_expr_1->m_attribute.m_basetype != p->m_expr_2->m_attribute.m_basetype)
+        t_error(expr_type_err, p->m_attribute);
+      if(p->m_expr_1->m_attribute.m_basetype != bt_integer
+          && p->m_expr_1->m_attribute.m_basetype != bt_boolean)
+        t_error(expr_type_err, p->m_attribute);
+      p->m_attribute.m_basetype = bt_boolean;
+      // DONE
     }
 
     void visitGt(Gt * p)
     {
       set_scope_and_descend_into_children(p);
-      // WRITEME
+      propagate_binary_expr(p, bt_integer, bt_boolean);
+      // DONE
     }
 
     void visitGteq(Gteq * p)
     {
       set_scope_and_descend_into_children(p);
-      // WRITEME
+      propagate_binary_expr(p, bt_integer, bt_boolean);
+      // DONE
     }
 
     void visitLt(Lt * p)
     {
       set_scope_and_descend_into_children(p);
-      // WRITEME
+      propagate_binary_expr(p, bt_integer, bt_boolean);
+      // DONE
     }
 
     void visitLteq(Lteq * p)
     {
       set_scope_and_descend_into_children(p);
-      // WRITEME
+      propagate_binary_expr(p, bt_integer, bt_boolean);
+      // DONE
     }
 
     void visitMinus(Minus * p)
     {
       set_scope_and_descend_into_children(p);
-      // WRITEME
+      propagate_binary_expr(p, bt_integer);
+      // DONE
     }
 
     void visitNoteq(Noteq * p)
     {
       set_scope_and_descend_into_children(p);
-      // WRITEME
+      if(p->m_expr_1->m_attribute.m_basetype != p->m_expr_2->m_attribute.m_basetype)
+        t_error(expr_type_err, p->m_attribute);
+      if(p->m_expr_1->m_attribute.m_basetype != bt_integer
+          && p->m_expr_1->m_attribute.m_basetype != bt_boolean)
+        t_error(expr_type_err, p->m_attribute);
+      p->m_attribute.m_basetype = bt_boolean;
+      // DONE
     }
 
     void visitOr(Or * p)
     {
       set_scope_and_descend_into_children(p);
-      // WRITEME
+      propagate_binary_expr(p, bt_boolean);
+      // DONE
     }
 
     void visitPlus(Plus * p)
     {
       set_scope_and_descend_into_children(p);
-      // WRITEME
+      propagate_binary_expr(p, bt_integer);
+      // DONE
     }
 
     void visitTimes(Times * p)
     {
       set_scope_and_descend_into_children(p);
-      // WRITEME
+      propagate_binary_expr(p, bt_integer);
+      // DONE
     }
 
     void visitNot(Not * p)
     {
       set_scope_and_descend_into_children(p);
-      // WRITEME
+      propagate_unary_expr(p, bt_boolean);
+      // DONE
     }
 
     void visitUminus(Uminus * p)
     {
       set_scope_and_descend_into_children(p);
-      // WRITEME
+      propagate_unary_expr(p, bt_integer);
+      // DONE
     }
 
     void visitMagnitude(Magnitude * p)
     {
       set_scope_and_descend_into_children(p);
-      // WRITEME
+      propagate_unary_expr(p, bt_integer);
+      // DONE
     }
 
     void visitIdent(Ident * p)
     {
       set_scope_and_descend_into_children(p);
-      // WRITEME DONE
+      // DONE
       // ASSERT symbol under varname exists and is either an integer or a boolean
       p->m_attribute.m_basetype =
         get_ident_type(p->m_symname->spelling(), bt_integer | bt_boolean, p->m_attribute);
@@ -516,8 +567,13 @@ class Typecheck : public Visitor {
     void visitArrayAccess(ArrayAccess * p)
     {
       set_scope_and_descend_into_children(p);
-      // WRITEME
+      // DONE
       // ASSERT the array symbol exists and is indeed an array
+      get_ident_type(p->m_symname->spelling(), bt_intarray, p->m_attribute);
+      // ASSERT the index is an integer expression
+      if(p->m_expr->m_attribute.m_basetype != bt_integer)
+        t_error(array_index_error, p->m_attribute);
+      p->m_attribute.m_basetype = bt_integer;
     }
 
     void visitIntLit(IntLit * p)
