@@ -415,8 +415,10 @@ class Typecheck : public Visitor {
     {
       set_scope_and_descend_into_children(p);
 
-      // WRITEME
+      // DONE
       // ASSERT Expression of type boolean
+      if(p->m_expr->m_attribute.m_basetype != bt_boolean)
+        t_error(while_pred_err, p->m_attribute);
     }
 
     void visitTInt(TInt * p)
