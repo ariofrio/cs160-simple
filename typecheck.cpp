@@ -194,8 +194,12 @@ class Typecheck : public Visitor {
     // It returns the actual type of the symbol.
     Basetype get_ident_type(const char* name, char accepted_types, Attribute m_attribute)
     {
-      // WRITEME
-      return bt_undef;
+      Symbol* symbol = m_st->lookup(name);
+      if(symbol == NULL)
+        t_error(sym_name_undef, m_attribute);
+      if(symbol->m_basetype & accepted_types)
+        t_error(sym_type_mismatch, m_attribute);
+      return symbol->m_basetype;
     }
 
   public:
@@ -503,8 +507,10 @@ class Typecheck : public Visitor {
     void visitIdent(Ident * p)
     {
       set_scope_and_descend_into_children(p);
-      // WRITEME
+      // WRITEME DONE
       // ASSERT symbol under varname exists and is either an integer or a boolean
+      p->m_attribute.m_basetype =
+        get_ident_type(p->m_symname->spelling(), bt_integer | bt_boolean, p->m_attribute);
     }
 
     void visitArrayAccess(ArrayAccess * p)
