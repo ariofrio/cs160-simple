@@ -2,7 +2,7 @@ function int foo(int x)
 {
     var bool ok;
     ok = true;
-    while (i<10) {
+    while (x<10) {
 	while ((ok)) {
 	    ok = !ok;
         }

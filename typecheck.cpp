@@ -313,18 +313,26 @@ class Typecheck : public Visitor {
     void visitAssignment(Assignment * p)
     {
       set_scope_and_descend_into_children(p);
-      // WRITEME
+      // DONE
       // ASSERT left hand side var exists, and is an int/bool
+      Basetype type = get_ident_type(p->m_symname->spelling(), bt_integer | bt_boolean, p->m_attribute);
       // ASSERT right hand side matches that type
+      if(p->m_expr->m_attribute.m_basetype != type)
+        t_error(incompat_assign, p->m_attribute);
     }
 
     void visitArrayAssignment(ArrayAssignment * p)
     {
       set_scope_and_descend_into_children(p);
-      // WRITEME	
+      // DONE	
       // ASSERT array exists and is an array
+      get_ident_type(p->m_symname->spelling(), bt_intarray, p->m_attribute);
       // ASSERT index is an integer
+      if(p->m_expr_1->m_attribute.m_basetype != bt_integer)
+        t_error(array_index_error, p->m_attribute);
       // ASSERT right hand side is an integer
+      if(p->m_expr_2->m_attribute.m_basetype != bt_integer)
+        t_error(incompat_assign, p->m_attribute);
     }
 
     // This method will throw an error unless:
@@ -366,27 +374,31 @@ class Typecheck : public Visitor {
     {
       set_scope_and_descend_into_children(p);
 
-      // WRITEME
+      // DONE
       // ASSERT left hand side var exists, is a variable, and get type
+      Basetype type = get_ident_type(p->m_symname_1->spelling(), bt_integer | bt_boolean, p->m_attribute);
 
       // ASSERT the parameters match, and the function return type matches
       // assuming that you have the type of the left hand side variable
       // in "assigned_to_type", you can just uncomment the following line
-      //check_call(p, p -> m_symname_2, p -> m_expr_list, assigned_to_type);
+      check_call(p, p->m_symname_2, p->m_expr_list, type);
     }
 
     void visitArrayCall(ArrayCall * p)
     {
       set_scope_and_descend_into_children(p);
 
-      // WRITEME
+      // DONE
       // ASSERT the variable is an array
+      get_ident_type(p->m_symname_1->spelling(), bt_intarray, p->m_attribute);
 
-      // WRITEME
+      // DONE
       // ASSERT the index parameter is an integer
+      if(p->m_expr_1->m_attribute.m_basetype != bt_integer)
+        t_error(array_index_error, p->m_attribute);
 
       // ASSERT the call is ok and returns an integer
-      check_call(p, p -> m_symname_2, p -> m_expr_list_2, bt_integer);
+      check_call(p, p->m_symname_2, p->m_expr_list_2, bt_integer);
     }
 
     void visitReturn(Return * p)
@@ -399,16 +411,20 @@ class Typecheck : public Visitor {
     {
       set_scope_and_descend_into_children(p);
 
-      // WRITEME
+      // DONE
       // ASSERT Expression of type boolean
+      if(p->m_expr->m_attribute.m_basetype != bt_boolean)
+        t_error(if_pred_err, p->m_attribute);
     }
 
     void visitIfWithElse(IfWithElse * p)
     {
       set_scope_and_descend_into_children(p);
 
-      // WRITEME
+      // DONE
       // ASSERT Expression of type boolean
+      if(p->m_expr->m_attribute.m_basetype != bt_boolean)
+        t_error(if_pred_err, p->m_attribute);
     }
 
     void visitWhileLoop(WhileLoop * p)

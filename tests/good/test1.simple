@@ -3,7 +3,7 @@ function bool array(int ax)
   var intarray[12] a;
   var intarray[12] b;
   var int x;
-  var int z;
+  var bool z;
 
   a[2+3] = b[0];
 	
@@ -39,11 +39,12 @@ function int Main()
 function int f(int ax)
 {
     var bool d;
+    var int j, k, x;
 
     function bool nested()
     {
         var int i, a;
-	return j-a == 12;
+        return i-a == 12;
     }
 
     return -(---k+j*k/x);

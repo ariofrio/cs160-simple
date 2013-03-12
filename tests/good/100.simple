@@ -1,3 +1,7 @@
+function int double(int x) {
+  return x*2;
+}
+
 function int Main() {
 	var int j, k, m, n;
 	var bool o;
@@ -5,7 +9,7 @@ function int Main() {
 	j = 2;
 	k = -j; 
 	m = 100 -k * k;
-	n = printint( m );
+	n = double( m );
 	[$ comments make me $$ happy... $]
 
 	return 0;

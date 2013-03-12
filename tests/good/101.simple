@@ -1,5 +1,15 @@
+function int bool2int(bool b) {
+  var int ret;
+  if(b) {
+    ret = 1;
+  } else {
+    ret = 0;
+  }
+  return ret;
+}
+
 function int Main() {
-	var int j, k, m, n;
+	var int j, k, m, n, ret;
 	var bool o;
 	var intarray[19] x;
 	
@@ -10,10 +20,10 @@ function int Main() {
 	j = 2;
 	k = -j; 
 	m = 100 -k * k;
-	n = printint( m );
+	n = m;
 
 	x[1] = 1;
 
-
-	return x[7+1];
+	ret = bool2int(x[7+1] < x[1]);
+  return ret;
 }
