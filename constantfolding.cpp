@@ -183,14 +183,40 @@ public:
 
   LatticeElemMap* visitIfNoElse(IfNoElse *p, LatticeElemMap *in)
   {
-    in = visit_children_of(p, in);
-    return in;
+    in = visit(p->m_expr, in);
+    LatticeElem &e = p->m_expr->m_attribute.m_lattice_elem;
+    if(e.value == TOP || e.value == BOTTOM) {
+    	LatticeElemMap* clone_if_true = new LatticeElemMap(*in);
+      clone_if_true = visit(p->m_nested_block, clone_if_true);
+      join_lattice_elem_maps(in, clone_if_true);
+      return in;
+    } else if(e.value == true) {
+      return visit(p->m_nested_block, in);
+    } else {
+      return in;
+    }
   }
 
   LatticeElemMap* visitIfWithElse(IfWithElse *p, LatticeElemMap *in)
   {
-    in = visit_children_of(p, in);
-    return in;
+    in = visit(p->m_expr, in);
+    LatticeElem &e = p->m_expr->m_attribute.m_lattice_elem;
+    if(e.value == TOP || e.value == BOTTOM) {
+    	LatticeElemMap* clone_if_true = new LatticeElemMap(*in);
+      clone_if_true = visit(p->m_nested_block_1, clone_if_true);
+
+    	LatticeElemMap* clone_if_false = new LatticeElemMap(*in);
+      clone_if_false = visit(p->m_nested_block_2, clone_if_false);
+
+      join_lattice_elem_maps(clone_if_true, clone_if_false);
+      return clone_if_true;
+    } else if(e.value == true) {
+      return visit(p->m_nested_block_1, in);
+    } else if(e.value == false) {
+      return visit(p->m_nested_block_2, in);
+    } else {
+      return in;
+    }
   }
 
   LatticeElemMap* visitWhileLoop(WhileLoop *p, LatticeElemMap *in)
@@ -454,7 +480,7 @@ public:
     LatticeElem &e1 = p->m_expr_1->m_attribute.m_lattice_elem;
     LatticeElem &e2 = p->m_expr_2->m_attribute.m_lattice_elem;
     if(e2.value == 0)
-      p->m_attribute.m_lattice_elem = TOP;
+      p->m_attribute.m_lattice_elem = 0;
     else if(e1.value == 0)
       p->m_attribute.m_lattice_elem = 0;
     else if(e1.value == TOP || e2.value == TOP)
