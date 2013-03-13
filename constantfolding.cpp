@@ -107,6 +107,9 @@ public:
   {
     // Intraprocedural; so let's start a new analysis for each function with a blank LatticeElemMap
     LatticeElemMap* newMap = new LatticeElemMap();
+    for(LatticeElemMap::iterator i = in->begin(); i != in->end(); i++) {
+      (*newMap)[i->first] = TOP; // higher scope vars are TOP
+    }
     newMap = visit_children_of(p, newMap);
     delete newMap;
     return in;
@@ -267,6 +270,8 @@ public:
       p->m_attribute.m_lattice_elem = false;
     else if(e1.value == TOP || e2.value == TOP)
       p->m_attribute.m_lattice_elem = TOP;
+    else if(e1.value == BOTTOM || e2.value == BOTTOM)
+      p->m_attribute.m_lattice_elem = BOTTOM;
     else
       p->m_attribute.m_lattice_elem = e1.value && e2.value;
     return in;
@@ -281,6 +286,8 @@ public:
       p->m_attribute.m_lattice_elem = true;
     else if(e1.value == TOP || e2.value == TOP)
       p->m_attribute.m_lattice_elem = TOP;
+    else if(e1.value == BOTTOM || e2.value == BOTTOM)
+      p->m_attribute.m_lattice_elem = BOTTOM;
     else
       p->m_attribute.m_lattice_elem = e1.value || e2.value;
     return in;
@@ -293,6 +300,8 @@ public:
     LatticeElem &e2 = p->m_expr_2->m_attribute.m_lattice_elem;
     if(e1.value == TOP || e2.value == TOP)
       p->m_attribute.m_lattice_elem = TOP;
+    else if(e1.value == BOTTOM || e2.value == BOTTOM)
+      p->m_attribute.m_lattice_elem = BOTTOM;
     else
       p->m_attribute.m_lattice_elem = e1.value == e2.value;
     return in;
@@ -305,6 +314,8 @@ public:
     LatticeElem &e2 = p->m_expr_2->m_attribute.m_lattice_elem;
     if(e1.value == TOP || e2.value == TOP)
       p->m_attribute.m_lattice_elem = TOP;
+    else if(e1.value == BOTTOM || e2.value == BOTTOM)
+      p->m_attribute.m_lattice_elem = BOTTOM;
     else
       p->m_attribute.m_lattice_elem = e1.value != e2.value;
     return in;
@@ -317,6 +328,8 @@ public:
     LatticeElem &e2 = p->m_expr_2->m_attribute.m_lattice_elem;
     if(e1.value == TOP || e2.value == TOP)
       p->m_attribute.m_lattice_elem = TOP;
+    else if(e1.value == BOTTOM || e2.value == BOTTOM)
+      p->m_attribute.m_lattice_elem = BOTTOM;
     else
       p->m_attribute.m_lattice_elem = e1.value > e2.value;
     return in;
@@ -329,6 +342,8 @@ public:
     LatticeElem &e2 = p->m_expr_2->m_attribute.m_lattice_elem;
     if(e1.value == TOP || e2.value == TOP)
       p->m_attribute.m_lattice_elem = TOP;
+    else if(e1.value == BOTTOM || e2.value == BOTTOM)
+      p->m_attribute.m_lattice_elem = BOTTOM;
     else
       p->m_attribute.m_lattice_elem = e1.value >= e2.value;
     return in;
@@ -341,6 +356,8 @@ public:
     LatticeElem &e2 = p->m_expr_2->m_attribute.m_lattice_elem;
     if(e1.value == TOP || e2.value == TOP)
       p->m_attribute.m_lattice_elem = TOP;
+    else if(e1.value == BOTTOM || e2.value == BOTTOM)
+      p->m_attribute.m_lattice_elem = BOTTOM;
     else
       p->m_attribute.m_lattice_elem = e1.value < e2.value;
     return in;
@@ -353,6 +370,8 @@ public:
     LatticeElem &e2 = p->m_expr_2->m_attribute.m_lattice_elem;
     if(e1.value == TOP || e2.value == TOP)
       p->m_attribute.m_lattice_elem = TOP;
+    else if(e1.value == BOTTOM || e2.value == BOTTOM)
+      p->m_attribute.m_lattice_elem = BOTTOM;
     else
       p->m_attribute.m_lattice_elem = e1.value <= e2.value;
     return in;
@@ -364,6 +383,8 @@ public:
     LatticeElem &e = p->m_expr->m_attribute.m_lattice_elem;
     if(e.value == TOP)
       p->m_attribute.m_lattice_elem = TOP;
+    else if(e.value == BOTTOM)
+      p->m_attribute.m_lattice_elem = BOTTOM;
     else
       p->m_attribute.m_lattice_elem = -(e.value);
     return in;
@@ -376,6 +397,8 @@ public:
     LatticeElem &e = p->m_expr->m_attribute.m_lattice_elem;
     if(e.value == TOP)
       p->m_attribute.m_lattice_elem = TOP;
+    else if(e.value == BOTTOM)
+      p->m_attribute.m_lattice_elem = BOTTOM;
     else
       p->m_attribute.m_lattice_elem = abs(e.value);
     return in;
@@ -388,6 +411,8 @@ public:
     LatticeElem &e2 = p->m_expr_2->m_attribute.m_lattice_elem;
     if(e1.value == TOP || e2.value == TOP)
       p->m_attribute.m_lattice_elem = TOP;
+    else if(e1.value == BOTTOM || e2.value == BOTTOM)
+      p->m_attribute.m_lattice_elem = BOTTOM;
     else
       p->m_attribute.m_lattice_elem = e1.value + e2.value;
     return in;
@@ -400,6 +425,8 @@ public:
     LatticeElem &e2 = p->m_expr_2->m_attribute.m_lattice_elem;
     if(e1.value == TOP || e2.value == TOP)
       p->m_attribute.m_lattice_elem = TOP;
+    else if(e1.value == BOTTOM || e2.value == BOTTOM)
+      p->m_attribute.m_lattice_elem = BOTTOM;
     else
       p->m_attribute.m_lattice_elem = e1.value - e2.value;
     return in;
@@ -414,6 +441,8 @@ public:
       p->m_attribute.m_lattice_elem = 0;
     else if(e1.value == TOP || e2.value == TOP)
       p->m_attribute.m_lattice_elem = TOP;
+    else if(e1.value == BOTTOM || e2.value == BOTTOM)
+      p->m_attribute.m_lattice_elem = BOTTOM;
     else
       p->m_attribute.m_lattice_elem = e1.value * e2.value;
     return in;
@@ -430,6 +459,8 @@ public:
       p->m_attribute.m_lattice_elem = 0;
     else if(e1.value == TOP || e2.value == TOP)
       p->m_attribute.m_lattice_elem = TOP;
+    else if(e1.value == BOTTOM || e2.value == BOTTOM)
+      p->m_attribute.m_lattice_elem = BOTTOM;
     else
       p->m_attribute.m_lattice_elem = e1.value / e2.value;
     return in;
@@ -447,6 +478,8 @@ public:
     // If it's TOP, then we cannot know anything about this expression; it should be TOP as well
     if (e == TOP)
 	    p->m_attribute.m_lattice_elem = TOP;
+    else if(e.value == BOTTOM)
+      p->m_attribute.m_lattice_elem = BOTTOM;
     else
 	    // Otherwise, it contains the boolean opposite of the child's LatticeElem
 	    p->m_attribute.m_lattice_elem = !(e.value);

@@ -1,0 +1,15 @@
+function int Main() {
+	var int a, b;
+	function int kme() {
+    var int x;
+    x = 2;
+    x = b;
+    a = x;
+		a = 9;
+		return a + 1;
+	}
+	a = a + 1;
+	b = 5;
+	a = kme();
+	return a+b;
+}
