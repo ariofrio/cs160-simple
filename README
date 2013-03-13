@@ -48,3 +48,15 @@ Andres Riofrio <ariofrio@cs.ucsb.edu>
 
   [each test]: http://www.cs.ucsb.edu/~cs160/projects/proj3samples
 
+**Implement type checking and semantic analysis**: Mar 5-12
+
+ - Replace my code with harness files from class website
+ - Remove `--only-scanner` option and associated tests
+ - Add semantic tests from class website
+ - Implement type checker, including checking that operators like magnitude
+   get integers as their inner expression
+ - Implement constant folding
+   - BOTTOM propagates in order to catch errors more easily
+   - Division by zero gives zero
+
+
