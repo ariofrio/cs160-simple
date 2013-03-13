@@ -19,6 +19,7 @@ report_incorrect() {
   echo $test
   tput sgr0
   [ "$error" ] && echo "$error" | indent
+  return 0
 }
 
 report_skipped() {
@@ -29,6 +30,7 @@ report_skipped() {
   echo $test
   tput sgr0
   [ "$error" ] && echo "$error" | indent
+  return 0
 }
 
 report_correct() {
@@ -38,6 +40,7 @@ report_correct() {
   echo $test
   tput sgr0
   [ "$error" ] && echo "$error" | indent
+  return 0
 }
 
 section() {
