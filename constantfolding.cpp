@@ -163,13 +163,18 @@ public:
   LatticeElemMap* visitCall(Call *p, LatticeElemMap *in)
   {
     in = visit_children_of(p, in);
-    (*in)[p->m_symname_1->spelling()] = TOP;
+    for(LatticeElemMap::iterator i = in->begin(); i != in->end(); i++) {
+      i->second = TOP;
+    }
     return in;
   }
 
   LatticeElemMap* visitArrayCall(ArrayCall *p, LatticeElemMap *in)
   {
     in = visit_children_of(p, in);
+    for(LatticeElemMap::iterator i = in->begin(); i != in->end(); i++) {
+      i->second = TOP;
+    }
     return in;
   }
 
