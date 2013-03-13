@@ -127,12 +127,17 @@ public:
   LatticeElemMap* visitParam(Param *p, LatticeElemMap *in)
   {
     in = visit_children_of(p, in);
+    (*in)[p->m_symname->spelling()] = TOP;
     return in;
   }
 
   LatticeElemMap* visitDecl(Decl *p, LatticeElemMap *in)
   {
     in = visit_children_of(p, in);
+    for(list<SymName_ptr>::iterator i = p->m_symname_list->begin();
+        i != p->m_symname_list->end(); i++) {
+      (*in)[(*i)->spelling()] = TOP;
+    }
     return in;
   }
 
@@ -158,6 +163,7 @@ public:
   LatticeElemMap* visitCall(Call *p, LatticeElemMap *in)
   {
     in = visit_children_of(p, in);
+    (*in)[p->m_symname_1->spelling()] = TOP;
     return in;
   }
 
@@ -257,7 +263,7 @@ public:
     else if(e1.value == TOP || e2.value == TOP)
       p->m_attribute.m_lattice_elem = TOP;
     else
-      p->m_attribute.m_lattice_elem = e1.value < e2.value;
+      p->m_attribute.m_lattice_elem = e1.value && e2.value;
     return in;
   }
   
@@ -271,7 +277,7 @@ public:
     else if(e1.value == TOP || e2.value == TOP)
       p->m_attribute.m_lattice_elem = TOP;
     else
-      p->m_attribute.m_lattice_elem = e1.value < e2.value;
+      p->m_attribute.m_lattice_elem = e1.value || e2.value;
     return in;
   }
 
