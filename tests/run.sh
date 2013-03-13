@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-cd $(dirname $0)
-SIMPLE="../simple $@"
+SIMPLE="./simple $@"
 
 indent() {
   c='s/^/  /'
@@ -55,19 +54,21 @@ correct=0
 skipped=0
 
 section "Parser rejects invalid programs"
-for test in $(find bad -name '*.simple' | sort); do
+for test in $(find tests/bad -name '*.simple' | sort); do
   error=$(bash -c "$SIMPLE < $test" 2>&1 1>/dev/null)
+  test="$SIMPLE < $test"
   [ "$error" ] && report_correct || report_incorrect
 done > >(indent)
 
 section "Parser accepts valid programs"
-for test in $(find good -name '*.simple' | sort); do
+for test in $(find tests/good -name '*.simple' | sort); do
   error=$(bash -c "$SIMPLE < $test" 2>&1 1>/dev/null)
+  test="$SIMPLE < $test"
   [ "$error" ] && report_incorrect || report_correct
 done > >(indent)
 
 section "Parser correctly constructs an AST for valid programs"
-for test in $(find good -name '*.simple' | sort); do
+for test in $(find tests/good -name '*.simple' | sort); do
   dotfile=${test%.simple}.dot
   if [ -f $dotfile ]; then
     tempfile=$(mktemp)
@@ -76,6 +77,7 @@ for test in $(find good -name '*.simple' | sort); do
       error=
       report_skipped
     else
+      test="$SIMPLE < $test | diff - $dotfile"
       diff $tempfile $dotfile &> /dev/null && report_correct || report_incorrect
       colordiff $tempfile $dotfile | indent
     fi
