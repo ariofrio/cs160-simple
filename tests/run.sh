@@ -67,23 +67,23 @@ for test in $(find tests/good -name '*.simple' | sort); do
   [ "$error" ] && report_incorrect || report_correct
 done > >(indent)
 
-section "Parser correctly constructs an AST for valid programs"
-for test in $(find tests/good -name '*.simple' | sort); do
-  dotfile=${test%.simple}.dot
-  if [ -f $dotfile ]; then
-    tempfile=$(mktemp)
-    error=$(bash -c "$SIMPLE < $test" 2>&1 > $tempfile)
-    if [ "$error" ]; then
-      error=
-      report_skipped
-    else
-      test="$SIMPLE < $test | diff - $dotfile"
-      diff $tempfile $dotfile &> /dev/null && report_correct || report_incorrect
-      colordiff $tempfile $dotfile | indent
-    fi
-    rm $tempfile
-  fi
-done > >(indent)
+#section "Parser correctly constructs an AST for valid programs"
+#for test in $(find tests/good -name '*.simple' | sort); do
+  #dotfile=${test%.simple}.dot
+  #if [ -f $dotfile ]; then
+    #tempfile=$(mktemp)
+    #error=$(bash -c "$SIMPLE --ast < $test" 2>&1 > $tempfile)
+    #if [ "$error" ]; then
+      #error=
+      #report_skipped
+    #else
+      #test="$SIMPLE --ast < $test | diff - $dotfile"
+      #diff $tempfile $dotfile &> /dev/null && report_correct || report_incorrect
+      #colordiff $tempfile $dotfile | indent
+    #fi
+    #rm $tempfile
+  #fi
+#done > >(indent)
 
 echo
 if [ $incorrect -gt 0 ] || [ $skipped -gt 0 ]; then

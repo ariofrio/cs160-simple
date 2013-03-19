@@ -58,6 +58,8 @@ class Symbol
 
   public:
 
+  int arr_length;
+  
   //don't need to store symbol name in the actual symbol
   //because we can get a copy of that from the symbol table 
 
@@ -68,12 +70,11 @@ class Symbol
   vector<Basetype> m_arg_type;
   Basetype m_return_type;
 
-  //WRITEME: add string size information
-
   Symbol() { 
 	m_offset = -1;
 	m_symscope = NULL;
 	m_basetype=bt_undef;
+	arr_length = -1;
   }
 
   int get_size() { 
@@ -82,7 +83,7 @@ class Symbol
 	  case bt_integer:         return(4); 
 	  case bt_boolean:         return(4);
 	  case bt_function:        return(0);
-	  case bt_intarray:        return(0);
+	  case bt_intarray:        assert(arr_length >= 0); return(arr_length*4);
 	  case bt_undef: 
 	  default: assert(0);
 

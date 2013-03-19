@@ -1,7 +1,10 @@
 #include "ast.hpp"
 #include "parser.hpp"
+#include "symtab.hpp"
+#include "primitive.hpp"
 #include "typecheck.cpp"
 #include "constantfolding.cpp"
+#include "codegen.cpp"
 #include <assert.h>
 #include <getopt.h>
 
@@ -22,6 +25,13 @@ void dopass_constantfolding(Program_ptr ast, SymTab* st) {
   map = ast->accept(constant_folding, map); //walk the tree with the visitor above
   delete map;
   delete constant_folding;
+}
+
+void dopass_codegen(Program_ptr ast, SymTab * st)
+{
+	Codegen *codegen = new Codegen(stdout, st);	// create the visitor
+	ast->accept(codegen);				// walk the tree with the visitor above
+	delete codegen;
 }
 
 Program_ptr ast; /* make sure to set this to the final syntax tree in parser.ypp*/
@@ -47,14 +57,17 @@ int main(int argc, char** argv) {
     }
   }
 
-  yyparse();
-  dopass_typecheck(ast, &st);
-  dopass_constantfolding(ast, &st);
+	// after parsing, the global "ast" should be set to the
+	// syntax tree that we have built up during the parse
+  yyparse();  
 
-  // walk over the ast and print it out as a dot file
-  if (ast) dopass_ast2dot( ast );
+	if (ast) {
+		dopass_typecheck( ast, &st );
+		dopass_constantfolding(ast, &st);
 
+		// do codegen!
+		dopass_codegen( ast, &st );
+	}
   return 0;
-
 }
 

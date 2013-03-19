@@ -153,6 +153,7 @@ class Typecheck : public Visitor {
     void add_decl_symbol(Decl *p)
     {
       list<SymName_ptr>::iterator symname_iter;
+
       char* name;
 
       Basetype type = p -> m_type -> m_attribute.m_basetype;
@@ -161,6 +162,11 @@ class Typecheck : public Visitor {
         Symbol *s = new Symbol();
         s -> m_basetype = type;
         name = strdup((*symname_iter) -> spelling());
+
+        if (type == bt_intarray) {
+          s -> arr_length = ((TIntArray*)p -> m_type) -> m_primitive -> m_data; 
+        }
+
         if (! m_st -> insert(name, s))
           this -> t_error(dup_ident_name,  p -> m_attribute);
       }
