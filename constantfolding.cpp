@@ -83,7 +83,7 @@ using namespace std;
  *   * We are not keeping track of IntArrays. Any array element is assumed to be TOP at all times.
  * Also:
  *   * Anything multiplied by 0 is 0
- *   * Dividing 0 by anything is always 0, and dividing anything by 0 makes the result TOP for the purposes of the analysis
+ *   * Dividing 0 by anything is always 0, and dividing anything by 0 makes the result 0 for this assignment
  *   * false AND anything is false, true OR anything is true
  *
  * While it is possible to do a more detailed analysis, that is not allowed in order to keep the grading fair. If you have 
@@ -201,30 +201,30 @@ public:
 
     // And then, as many times as needed,
     while(true) {
-	// Copy this lattice elem map into another
+	    // Copy this lattice elem map into another
     	LatticeElemMap* clone = new LatticeElemMap(*in);
 	
-	// Visit the block using this clone
+	    // Visit the block using this clone
     	clone = visit(p->m_nested_block, clone);
-
-	// now visit the expression
-	clone = visit(p->m_expr, clone);
-
+    	
 	// Join the original "in" lattice_elem_map with the clone,
 	// storing the result in the clone
 	join_lattice_elem_maps(clone, in);
+	// now visit the expression
+         clone = visit(p->m_expr, clone);
+                 
 
-	// Compare them
-	bool equal = lattice_maps_equal(in, clone);
+	    // Compare them
+	    bool equal = lattice_maps_equal(in, clone);
 
-	// Make "in" point to the clone, deleting in
-	delete in;
-	in = clone;
+		// Make "in" point to the clone, deleting in
+		delete in;
+		in = clone;
 
-	// If the clone was the same as "in", meaning that we've reached a fix-point,
-	// we're done!
-	if (equal)
-		return in;
+		// If the clone was the same as "in", meaning that we've reached a fix-point,
+		// we're done!
+		if (equal)
+			return in;
     }
   }
 
@@ -326,6 +326,8 @@ public:
 
   LatticeElemMap* visitDiv(Div *p, LatticeElemMap *in)
   {
+    // now anything div by 0 will result in 0 instead of TOP ( x/0 = 0) update your code
+    // accordingly
     in = visit_children_of(p, in);
     return in;
   }

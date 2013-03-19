@@ -19,6 +19,7 @@ class Ast2dot : public Visitor {
 	s.push(0);
 	m_out = out;
 	fprintf( m_out, "digraph G { \n" );
+	add_node(count, "Program");
  }
 
  void finish() { 
@@ -37,48 +38,38 @@ class Ast2dot : public Visitor {
 
  void draw(const char* n, Visitable* p) {
 	count++; 			// each node gets a unique number
-	add_node( count, n );		// name the this node
 	add_edge( s.top(), count ); 	// from parent to this 
+	add_node( count, n );		// name the this node
 	s.push(count);			// now this node is the parent
 	if (p != 0)
 		p->visit_children(this);	
 	s.pop();			// now restore old parent
  }
- 
- void draw_expr(const char* n, Visitable* p) {
-	char buffer[12];
-	p->m_attribute.m_lattice_elem.to_string(buffer);
-
-	count++; 			// each node gets a unique number
-	fprintf( m_out, "\"%d\" [label=\"%s\\n<%s>\"]\n" , count, n, buffer );
-	add_edge( s.top(), count ); 	// from parent to this 
-	s.push(count);			// now this node is the parent
-	if (p != 0)
-		p->visit_children(this);
-	s.pop();			// now restore old parent
- }
 
  void draw_symname(const char* n, SymName* p) {
 	count++; 			// each node gets a unique number
+	add_edge( s.top(), count ); 	// from parent to this 
 	// print symname strings
 	if (p != 0)
 		fprintf( m_out, "\"%d\" [label=\"%s\\n\\\"%s\\\"\"]\n" , count, n, p->spelling() );
 	else
 		fprintf( m_out, "\"%d\" [label=\"%s\\n\\\"null\\\"\"]\n", count, n );
-	add_edge( s.top(), count ); 	// from parent to this 
  }
 
  void draw_primitive(const char* n, Primitive* p) {
 	count++; 			// each node gets a unique number
+	add_edge( s.top(), count ); 	// from parent to this
 	if (p != 0)
 		fprintf( m_out, "\"%d\" [label=\"%s\\n%d\"]\n" , count, n, p->m_data );
 	else
 		fprintf( m_out, "\"%d\" [label=\"%s\\nnull\"]\n" , count, n );
-	add_edge( s.top(), count ); 	// from parent to this
  }
 
 
- void visitProgram(Program *p) { draw("Program", p); }
+ void visitProgram(Program *p) { //draw("Program", p); 
+ 	if (p != 0)
+		p->visit_children(this);
+ }
  void visitFunc(Func *p) { draw("Func", p); }
  void visitFunction_block(Function_block *p) { draw("FunctionBlock", p); }
  void visitNested_block(Nested_block *p) { draw("NestedBlock", p); } 
@@ -97,25 +88,25 @@ class Ast2dot : public Visitor {
  void visitTBool(TBool *p) { draw("TBool", p); }
  void visitTIntArray(TIntArray *p) { draw("TIntArray", p); }
 
- void visitAnd(And *p) { draw_expr("And", p); }
- void visitDiv(Div *p) { draw_expr("Div", p); }
- void visitCompare(Compare *p) { draw_expr("Compare", p); }
- void visitGt(Gt *p) { draw_expr("Gt", p); }
- void visitGteq(Gteq *p) { draw_expr("Gteq", p); }
- void visitLt(Lt *p) { draw_expr("Lt", p); }
- void visitLteq(Lteq *p) { draw_expr("Lteq", p); }
- void visitMinus(Minus *p) { draw_expr("Minus", p); }
- void visitNoteq(Noteq *p) { draw_expr("Noteq", p); }
- void visitOr(Or *p) { draw_expr("Or", p); }
- void visitPlus(Plus *p) { draw_expr("Plus", p); }
- void visitTimes(Times *p) { draw_expr("Times", p); }
- void visitNot(Not *p) { draw_expr("Not", p); }
- void visitUminus(Uminus *p) { draw_expr("Uminus", p); }
- void visitMagnitude(Magnitude *p) { draw_expr("Magnitude", p); }
- void visitIdent(Ident *p) { draw_expr("Ident", p); }
- void visitArrayAccess(ArrayAccess *p) { draw_expr("ArrayAccess", p); }
- void visitIntLit(IntLit *p) { draw_expr("IntLit", p); }
- void visitBoolLit(BoolLit *p) { draw_expr("BoolLit", p); }
+ void visitAnd(And *p) { draw("And", p); }
+ void visitDiv(Div *p) { draw("Div", p); }
+ void visitCompare(Compare *p) { draw("Compare", p); }
+ void visitGt(Gt *p) { draw("Gt", p); }
+ void visitGteq(Gteq *p) { draw("Gteq", p); }
+ void visitLt(Lt *p) { draw("Lt", p); }
+ void visitLteq(Lteq *p) { draw("Lteq", p); }
+ void visitMinus(Minus *p) { draw("Minus", p); }
+ void visitNoteq(Noteq *p) { draw("Noteq", p); }
+ void visitOr(Or *p) { draw("Or", p); }
+ void visitPlus(Plus *p) { draw("Plus", p); }
+ void visitTimes(Times *p) { draw("Times", p); }
+ void visitNot(Not *p) { draw("Not", p); }
+ void visitUminus(Uminus *p) { draw("Uminus", p); }
+ void visitMagnitude(Magnitude *p) { draw("Magnitude", p); }
+ void visitIdent(Ident *p) { draw("Ident", p); }
+ void visitArrayAccess(ArrayAccess *p) { draw("ArrayAccess", p); }
+ void visitIntLit(IntLit *p) { draw("IntLit", p); }
+ void visitBoolLit(BoolLit *p) { draw("BoolLit", p); }
 
  //special cases
  void visitSymName(SymName *p) { draw_symname("SymName",p); }
