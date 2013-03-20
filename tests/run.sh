@@ -72,7 +72,7 @@ function simplec() {
   gcc -m32 -c -o $ofile $sfile &&
   gcc -m32 -c -o tests/good/start.o tests/good/start.c &&
   gcc -m32 -o $runfile tests/good/start.o $ofile &&
-  $runfile
+  bash -c "$runfile"
 }
 
 section "Valid programs compile and run correctly"
@@ -84,6 +84,7 @@ for test in $(find tests/good -name '*.simple' | sort); do
   if [ -f $outfile ]; then
     tempfile=$(mktemp)
     error=$(simplec 2>&1 > $tempfile)
+    test="$SIMPLE < $test > $sfile"
     if [ "$error" ]; then
       report_incorrect
     else
