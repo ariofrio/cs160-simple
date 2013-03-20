@@ -50,7 +50,7 @@ function int f(int ax)
     return -(---k+j*k/x);
 }
 
-function bool main(int a)
+function bool main2(int a)
 {
     var int i;
 
