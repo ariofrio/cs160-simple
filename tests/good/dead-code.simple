@@ -1,0 +1,16 @@
+function int Main() {
+  var int x;
+  if(false) {
+    x = 2;
+  }
+  while(false) {
+    x = 3;
+  }
+  if(true) {
+    x = 1;
+  } else {
+    x = 4;
+  }
+  return x;
+}
+

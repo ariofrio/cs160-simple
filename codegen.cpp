@@ -263,40 +263,66 @@ public:
   // control flow
   void visitIfNoElse(IfNoElse * p)
   {
-    int label = new_label();
-    p->m_expr->accept(this);
-    echo("popl %%eax");
-    echo("testl %%eax, %%eax");
-    echo("jz label%d", label);
-    p->m_nested_block->accept(this);
-    echo("label%d:", label);
+    int value = p->m_expr->m_attribute.m_lattice_elem.value;
+    if(value != TOP && value != BOTTOM) {
+      if(value == true) {
+        p->m_nested_block->accept(this);
+      }
+    } else {
+      int label = new_label();
+      p->m_expr->accept(this);
+      echo("popl %%eax");
+      echo("testl %%eax, %%eax");
+      echo("jz label%d", label);
+      p->m_nested_block->accept(this);
+      echo("label%d:", label);
+    }
   }
   void visitIfWithElse(IfWithElse * p)
   {
-    int labelElse = new_label();
-    int labelEnd = new_label();
-    p->m_expr->accept(this);
-    echo("popl %%eax");
-    echo("testl %%eax, %%eax");
-    echo("jz label%d", labelElse);
-    p->m_nested_block_1->accept(this);
-    echo("jmp label%d", labelEnd);
-    echo("label%d:", labelElse);
-    p->m_nested_block_2->accept(this);
-    echo("label%d:", labelEnd);
+    int value = p->m_expr->m_attribute.m_lattice_elem.value;
+    if(value != TOP && value != BOTTOM) {
+      if(value == true) {
+        p->m_nested_block_1->accept(this);
+      } else {
+        p->m_nested_block_2->accept(this);
+      }
+    } else {
+      int labelElse = new_label();
+      int labelEnd = new_label();
+      p->m_expr->accept(this);
+      echo("popl %%eax");
+      echo("testl %%eax, %%eax");
+      echo("jz label%d", labelElse);
+      p->m_nested_block_1->accept(this);
+      echo("jmp label%d", labelEnd);
+      echo("label%d:", labelElse);
+      p->m_nested_block_2->accept(this);
+      echo("label%d:", labelEnd);
+    }
   }
   void visitWhileLoop(WhileLoop * p)
   {
-    int labelTop = new_label();
-    int labelEnd = new_label();
-    echo("label%d:", labelTop);
-    p->m_expr->accept(this);
-    echo("popl %%eax");
-    echo("testl %%eax, %%eax");
-    echo("jz label%d", labelEnd);
-    p->m_nested_block->accept(this);
-    echo("jmp label%d", labelTop);
-    echo("label%d:", labelEnd);
+    int value = p->m_expr->m_attribute.m_lattice_elem.value;
+    if(value != TOP && value != BOTTOM) {
+      if(value == true) {
+        int labelTop = new_label();
+        echo("label%d:", labelTop);
+        p->m_nested_block->accept(this);
+        echo("jmp label%d", labelTop);
+      }
+    } else {
+      int labelTop = new_label();
+      int labelEnd = new_label();
+      echo("label%d:", labelTop);
+      p->m_expr->accept(this);
+      echo("popl %%eax");
+      echo("testl %%eax, %%eax");
+      echo("jz label%d", labelEnd);
+      p->m_nested_block->accept(this);
+      echo("jmp label%d", labelTop);
+      echo("label%d:", labelEnd);
+    }
   }
 
   // variable declarations (no code generation needed)
