@@ -255,6 +255,16 @@ public:
   }
   void visitWhileLoop(WhileLoop * p)
   {
+    int labelTop = new_label();
+    int labelEnd = new_label();
+    echo("label%d:", labelTop);
+    p->m_expr->accept(this);
+    echo("popl %%eax");
+    echo("testl %%eax, %%eax");
+    echo("jz label%d", labelEnd);
+    p->m_nested_block->accept(this);
+    echo("jmp label%d", labelTop);
+    echo("label%d:", labelEnd);
   }
 
   // variable declarations (no code generation needed)
@@ -277,21 +287,63 @@ public:
   // comparison operations
   void visitCompare(Compare * p)
   {
+    p->visit_children(this);
+    echo("popl %%ebx");
+    echo("popl %%eax");
+    echo("cmpl %%ebx, %%eax");
+    echo("sete %%al");
+    echo("andl $255, %%eax");
+    echo("pushl %%eax");
   }
   void visitNoteq(Noteq * p)
   {
+    p->visit_children(this);
+    echo("popl %%ebx");
+    echo("popl %%eax");
+    echo("cmpl %%ebx, %%eax");
+    echo("setne %%al");
+    echo("andl $255, %%eax");
+    echo("pushl %%eax");
   }
   void visitGt(Gt * p)
   {
+    p->visit_children(this);
+    echo("popl %%ebx");
+    echo("popl %%eax");
+    echo("cmpl %%ebx, %%eax");
+    echo("setg %%al");
+    echo("andl $255, %%eax");
+    echo("pushl %%eax");
   }
   void visitGteq(Gteq * p)
   {
+    p->visit_children(this);
+    echo("popl %%ebx");
+    echo("popl %%eax");
+    echo("cmpl %%ebx, %%eax");
+    echo("setge %%al");
+    echo("andl $255, %%eax");
+    echo("pushl %%eax");
   }
   void visitLt(Lt * p)
   {
+    p->visit_children(this);
+    echo("popl %%ebx");
+    echo("popl %%eax");
+    echo("cmpl %%ebx, %%eax");
+    echo("setl %%al");
+    echo("andl $255, %%eax");
+    echo("pushl %%eax");
   }
   void visitLteq(Lteq * p)
   {
+    p->visit_children(this);
+    echo("popl %%ebx");
+    echo("popl %%eax");
+    echo("cmpl %%ebx, %%eax");
+    echo("setle %%al");
+    echo("andl $255, %%eax");
+    echo("pushl %%eax");
   }
 
   // arithmetic and logic operations
