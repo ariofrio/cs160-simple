@@ -129,6 +129,17 @@ class Codegen : public Visitor
         node->m_symname->spelling())->get_offset();
   }
 
+  template<class type>
+  inline bool fold_constant(type* expr) {
+    int value = expr->m_attribute.m_lattice_elem.value;
+    if(value == TOP || value == BOTTOM) {
+      return false;
+    } else {
+      echo("pushl $%d", value);
+      return true;
+    }
+  }
+
 ////////////////////////////////////////////////////////////////////////////////
 
 public:
@@ -308,6 +319,7 @@ public:
   // comparison operations
   void visitCompare(Compare * p)
   {
+    if(fold_constant(p)) return;
     p->visit_children(this);
     echo("popl %%ebx");
     echo("popl %%eax");
@@ -318,6 +330,7 @@ public:
   }
   void visitNoteq(Noteq * p)
   {
+    if(fold_constant(p)) return;
     p->visit_children(this);
     echo("popl %%ebx");
     echo("popl %%eax");
@@ -328,6 +341,7 @@ public:
   }
   void visitGt(Gt * p)
   {
+    if(fold_constant(p)) return;
     p->visit_children(this);
     echo("popl %%ebx");
     echo("popl %%eax");
@@ -338,6 +352,7 @@ public:
   }
   void visitGteq(Gteq * p)
   {
+    if(fold_constant(p)) return;
     p->visit_children(this);
     echo("popl %%ebx");
     echo("popl %%eax");
@@ -348,6 +363,7 @@ public:
   }
   void visitLt(Lt * p)
   {
+    if(fold_constant(p)) return;
     p->visit_children(this);
     echo("popl %%ebx");
     echo("popl %%eax");
@@ -358,6 +374,7 @@ public:
   }
   void visitLteq(Lteq * p)
   {
+    if(fold_constant(p)) return;
     p->visit_children(this);
     echo("popl %%ebx");
     echo("popl %%eax");
@@ -370,6 +387,7 @@ public:
   // arithmetic and logic operations
   void visitAnd(And * p)
   {
+    if(fold_constant(p)) return;
     p->visit_children(this);
     echo("popl %%ebx");
     echo("popl %%eax");
@@ -378,6 +396,7 @@ public:
   }
   void visitOr(Or * p)
   {
+    if(fold_constant(p)) return;
     p->visit_children(this);
     echo("popl %%ebx");
     echo("popl %%eax");
@@ -386,6 +405,7 @@ public:
   }
   void visitMinus(Minus * p)
   {
+    if(fold_constant(p)) return;
     p->visit_children(this);
     echo("popl %%ebx");
     echo("popl %%eax");
@@ -394,6 +414,7 @@ public:
   }
   void visitPlus(Plus * p)
   {
+    if(fold_constant(p)) return;
     p->visit_children(this);
     echo("popl %%ebx");
     echo("popl %%eax");
@@ -402,6 +423,7 @@ public:
   }
   void visitTimes(Times * p)
   {
+    if(fold_constant(p)) return;
     p->visit_children(this);
     echo("popl %%ebx");
     echo("popl %%eax");
@@ -410,6 +432,7 @@ public:
   }
   void visitDiv(Div * p)
   {
+    if(fold_constant(p)) return;
     p->visit_children(this);
     echo("popl %%ebx");
     echo("popl %%eax");
@@ -419,6 +442,7 @@ public:
   }
   void visitNot(Not * p)
   {
+    if(fold_constant(p)) return;
     p->visit_children(this);
     echo("popl %%eax");
     echo("notl %%eax");
@@ -426,6 +450,7 @@ public:
   }
   void visitUminus(Uminus * p)
   {
+    if(fold_constant(p)) return;
     p->visit_children(this);
     echo("popl %%eax");
     echo("negl %%eax");
@@ -433,6 +458,7 @@ public:
   }
   void visitMagnitude(Magnitude * p)
   {
+    if(fold_constant(p)) return;
     p->visit_children(this);
     echo("popl %%eax");
     echo("cdq");
@@ -444,6 +470,7 @@ public:
   // variable and constant access
   void visitIdent(Ident * p)
   {
+    if(fold_constant(p)) return;
     echo("pushl %d(%%ebp)", ebp_offset(p));
   }
   void visitIntLit(IntLit * p)
