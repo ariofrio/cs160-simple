@@ -67,23 +67,32 @@ for test in $(find tests/good -name '*.simple' | sort); do
   [ "$error" ] && report_incorrect || report_correct
 done > >(indent)
 
-#section "Parser correctly constructs an AST for valid programs"
-#for test in $(find tests/good -name '*.simple' | sort); do
-  #dotfile=${test%.simple}.dot
-  #if [ -f $dotfile ]; then
-    #tempfile=$(mktemp)
-    #error=$(bash -c "$SIMPLE --ast < $test" 2>&1 > $tempfile)
-    #if [ "$error" ]; then
-      #error=
-      #report_skipped
-    #else
-      #test="$SIMPLE --ast < $test | diff - $dotfile"
-      #diff $tempfile $dotfile &> /dev/null && report_correct || report_incorrect
-      #colordiff $tempfile $dotfile | indent
-    #fi
-    #rm $tempfile
-  #fi
-#done > >(indent)
+function simplec() {
+  ./simple < $test > $sfile &&
+  gcc -m32 -c -o $ofile $sfile &&
+  gcc -m32 -c -o tests/good/start.o tests/good/start.c &&
+  gcc -m32 -o $runfile tests/good/start.o $ofile &&
+  $runfile
+}
+
+section "Valid programs compile and run correctly"
+for test in $(find tests/good -name '*.simple' | sort); do
+  runfile=${test%.simple}.run
+  ofile=${test%.simple}.o
+  sfile=${test%.simple}.s
+  outfile=${test%.simple}.out
+  if [ -f $outfile ]; then
+    tempfile=$(mktemp)
+    error=$(simplec 2>&1 > $tempfile)
+    if [ "$error" ]; then
+      report_incorrect
+    else
+      diff $tempfile $outfile &> /dev/null && report_correct || report_incorrect
+      colordiff $tempfile $outfile | indent
+    fi
+    rm $tempfile
+  fi
+done > >(indent)
 
 echo
 if [ $incorrect -gt 0 ] || [ $skipped -gt 0 ]; then

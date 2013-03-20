@@ -1,0 +1,11 @@
+function int Main() {
+  var bool x;
+  var int ret;
+  x = true && !false;
+  if(x) {
+    ret = 1;
+  } else {
+    ret = 0;
+  }
+  return ret;
+}

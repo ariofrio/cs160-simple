@@ -1,0 +1,22 @@
+function bool AndOr() {
+  return true && (false || false);
+}
+
+function int bool2int(bool x) {
+  var int ret;
+  if(x) {
+    ret = 1;
+  } else {
+    ret = 0;
+  }
+  return ret;
+}
+
+function int Main() {
+  var bool t;
+  var int ret;
+  t = AndOr();
+  ret = bool2int(t);
+  return ret;
+}
+

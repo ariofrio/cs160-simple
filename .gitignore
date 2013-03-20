@@ -7,3 +7,6 @@ lexer.*
 tags
 ast.cpp
 ast.hpp
+tests/good/*.run
+tests/good/*.s
+tests/good/start.*
