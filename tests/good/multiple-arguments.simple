@@ -1,0 +1,10 @@
+function int Divide(int x, int y) {
+  return x/y;
+}
+
+function int Main() {
+  var int ret;
+  ret = Divide(40, 4);
+  return ret;
+}
+

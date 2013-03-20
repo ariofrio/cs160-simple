@@ -1,0 +1,6 @@
+function int Main() {
+  var int ret;
+  ret = (20+3*4) - 12;
+  return ret;
+}
+

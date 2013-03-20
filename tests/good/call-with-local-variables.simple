@@ -1,0 +1,12 @@
+function int Twenty() {
+  var int x;
+  x = 20;
+  return x;
+}
+
+function int Main() {
+  var int ret;
+  ret = Twenty();
+  return ret;
+}
+

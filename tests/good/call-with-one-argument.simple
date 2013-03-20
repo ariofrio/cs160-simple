@@ -1,0 +1,10 @@
+function int Double(int x) {
+  return x * 2;
+}
+
+function int Main() {
+  var int ret;
+  ret = Double(50);
+  return ret;
+}
+
