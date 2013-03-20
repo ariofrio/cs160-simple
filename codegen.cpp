@@ -299,7 +299,7 @@ public:
     p->visit_children(this);
     echo("pop %%ebx");
     echo("pop %%eax");
-    echo("and %%ebx, %%eax");
+    echo("or %%ebx, %%eax");
     echo("push %%eax");
   }
   void visitMinus(Minus * p)
