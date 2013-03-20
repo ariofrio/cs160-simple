@@ -68,13 +68,10 @@ for test in $(find tests/good -name '*.simple' | sort); do
 done > >(indent)
 
 function simplec() {
-  ./simple < $test > $sfile &&
+  bash -c "./simple < $test > $sfile" &&
   gcc -m32 -c -o $ofile $sfile &&
   gcc -m32 -c -o tests/good/start.o tests/good/start.c &&
   gcc -m32 -o $runfile tests/good/start.o $ofile
-}
-function runsimple() {
-  simplec && bash -c "$runfile"
 }
 
 section "Valid programs compile"
@@ -101,16 +98,21 @@ for test in $(find tests/good -name '*.simple' | sort); do
   outfile=${test%.simple}.out
 
   if [ -f $outfile ]; then
-    tempfile=$(mktemp)
-    error=$(runsimple 2>&1 > $tempfile)
+    error=$(simplec 2>&1 > /dev/null) #$tempfile)
     test="$SIMPLE < $test > $sfile"
     if [ "$error" ]; then
       report_skipped
     else
-      diff $tempfile $outfile &> /dev/null && report_correct || report_incorrect
-      colordiff $tempfile $outfile | indent
+      tempfile=$(mktemp)
+      error=$(bash -c "$runfile > $tempfile" 2>&1)
+      if [ "$error" ]; then
+        report_incorrect
+      else
+        diff $tempfile $outfile &> /dev/null && report_correct || report_incorrect
+        colordiff $tempfile $outfile | indent
+      fi
+      rm $tempfile
     fi
-    rm $tempfile
   fi
 done > >(indent)
 
