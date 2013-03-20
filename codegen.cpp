@@ -203,6 +203,11 @@ public:
   }
   void visitArrayAssignment(ArrayAssignment * p)
   {
+    p->m_expr_2->accept(this);
+    p->m_expr_1->accept(this);
+    echo("popl %%eax");
+    echo("negl %%eax");
+    echo("popl %d(%%ebp, %%eax, %d)", ebp_offset(p), wordsize);
   }
   void visitCall(Call * p)
   {
@@ -221,6 +226,22 @@ public:
   }
   void visitArrayCall(ArrayCall *p)
   {
+    int blocksize = 0;
+
+    list<Expr_ptr>::reverse_iterator iterator;
+    for(iterator = p->m_expr_list_2->rbegin(); iterator != p->m_expr_list_2->rend(); iterator++) {
+      Expr* expr = *iterator;
+      expr->accept(this);
+      blocksize += 4;
+    }
+    echo("call %s", p->m_symname_2->spelling());
+    echo("addl $%d, %%esp", blocksize);
+    echo("pushl %%eax");
+
+    p->m_expr_1->accept(this);
+    echo("popl %%eax");
+    echo("negl %%eax");
+    echo("popl %d(%%ebp, %%eax, %d)", ebp_offset(p, p->m_symname_1), wordsize);
   }
   void visitReturn(Return * p)
   {
@@ -435,6 +456,10 @@ public:
   }
   void visitArrayAccess(ArrayAccess * p)
   {
+    p->visit_children(this);
+    echo("popl %%eax");
+    echo("neg %%eax");
+    echo("pushl %d(%%ebp, %%eax, %d)", ebp_offset(p), wordsize);
   }
 
   // special cases

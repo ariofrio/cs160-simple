@@ -1,0 +1,24 @@
+function int GetElement(int x) {
+  return x * 100;
+}
+
+function int Main() {
+  var intarray[10] xs;
+  var int i, ret;
+  i = 0;
+  while(i < 10) {
+    xs[i] = GetElement(i);
+    i = i + 1;
+  }
+
+  i = 0;
+  ret = 0;
+  while(i < 10) {
+    ret = ret + xs[i];
+    i = i + 1;
+  }
+
+  ret = ret / 10;
+  return ret;
+}
+
