@@ -59,4 +59,13 @@ Andres Riofrio <ariofrio@cs.ucsb.edu>
    - BOTTOM propagates in order to catch errors more easily
    - Division by zero gives zero
 
+**Implement code generation**: Mar 17-20
+
+ - Test that correct programs compile and produce expected output
+ - Literals and identifiers push a value to the stack
+ - Operators pop one or two values from the stack and push the result
+ - Comparison operators implemented with `SETcc %eal` followed by `ANDL $255
+   %eax`
+ - Function arguments are copied to occupy the same space as local variables,
+   for ease of access
 
