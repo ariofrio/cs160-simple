@@ -107,18 +107,24 @@ class Codegen : public Visitor
 	//	This convention is called __cdecl
 	//
 	//////////////////////////////////////////////////////////////////////////////
+
+  template<class type>
+  inline int ebp_offset(type* node, SymName* symname) {
+    // old %ebp, %ebc, %edx
+    return -3*wordsize - m_st->lookup(
+        node->m_attribute.m_scope, 
+        symname->spelling())->get_offset();
+  }
   
   template<class type>
   inline int ebp_offset(type* node) {
-    return -wordsize - m_st->lookup(
-        node->m_attribute.m_scope, 
-        node->m_symname->spelling())->get_offset();
+    return ebp_offset(node, node->m_symname);
   }
 
   template<class type>
   inline int ebp_arg_offset(type* node) {
-    // old %ebp, %eip, %ebx, %edx
-    return 4*wordsize + m_st->lookup(
+    // old %ebp, %eip
+    return 2 * wordsize + m_st->lookup(
         node->m_attribute.m_scope, 
         node->m_symname->spelling())->get_offset();
   }
@@ -146,41 +152,41 @@ public:
     echo("%s:", p->m_symname->spelling());
 
     // Save and update the %ebp
-    echo("push %%ebp");
-    echo("mov %%esp, %%ebp");
+    echo("pushl %%ebp");
+    echo("movl %%esp, %%ebp");
 
     // Save CPU registers used for temporaries
-    echo("push %%ebx");
-    echo("push %%edx");
+    echo("pushl %%ebx");
+    echo("pushl %%edx");
 
     // Allocate local variables (and space for copy of arguments)
     SymScope* inner_scope =
       p->m_function_block->m_attribute.m_scope;
     int scopesize = m_st->scopesize(inner_scope);
-    echo("sub $%d, %%esp", scopesize);
+    echo("subl $%d, %%esp", scopesize);
 
     // Copy arguments as local variables
     list<Param_ptr>::iterator param_iter;
     forall(param_iter, p->m_param_list) {
       Param *pip = *param_iter;
-      echo("mov %d(%%ebp), %%eax", ebp_arg_offset(pip));
-      echo("mov %%eax, %d(%%ebp)", ebp_offset(pip));
+      echo("movl %d(%%ebp), %%eax", ebp_arg_offset(pip));
+      echo("movl %%eax, %d(%%ebp)", ebp_offset(pip));
     }
 
     p->visit_children(this);
 
     // Release local storage
-    echo("add $%d, %%esp", scopesize);
+    echo("addl $%d, %%esp", scopesize);
     
     // Restore saved registers
-    echo("pop %%ebx");
+    echo("popl %%ebx");
 
     // Restore the old base pointer
-    echo("pop %%edx");
-    echo("pop %%ebp");
+    echo("popl %%edx");
+    echo("popl %%ebp");
 
     // Return from the function
-    echo("ret");
+    echo("retl");
   }
   void visitFunction_block(Function_block * p)
   {
@@ -193,13 +199,25 @@ public:
   void visitAssignment(Assignment * p)
   {
     p->visit_children(this);
-    echo("pop %d(%%ebp)", ebp_offset(p));
+    echo("popl %d(%%ebp)", ebp_offset(p));
   }
   void visitArrayAssignment(ArrayAssignment * p)
   {
   }
   void visitCall(Call * p)
   {
+    int blocksize = 0;
+
+    list<Expr_ptr>::reverse_iterator iterator;
+    for(iterator = p->m_expr_list->rbegin(); iterator != p->m_expr_list->rend(); iterator++) {
+      Expr* expr = *iterator;
+      expr->accept(this);
+      blocksize += 4;
+    }
+    echo("call %s", p->m_symname_2->spelling());
+    echo("addl $%d, %%esp", blocksize);
+
+    echo("movl %%eax, %d(%%ebp)", ebp_offset(p, p->m_symname_1));
   }
   void visitArrayCall(ArrayCall *p)
   {
@@ -207,7 +225,7 @@ public:
   void visitReturn(Return * p)
   {
     p->visit_children(this);
-    echo("pop %%eax");
+    echo("popl %%eax");
   }
 
   // control flow
@@ -215,7 +233,7 @@ public:
   {
     int label = new_label();
     p->m_expr->accept(this);
-    echo("pop %%eax");
+    echo("popl %%eax");
     echo("testl %%eax, %%eax");
     echo("jz label%d", label);
     p->m_nested_block->accept(this);
@@ -226,7 +244,7 @@ public:
     int labelElse = new_label();
     int labelEnd = new_label();
     p->m_expr->accept(this);
-    echo("pop %%eax");
+    echo("popl %%eax");
     echo("testl %%eax, %%eax");
     echo("jz label%d", labelElse);
     p->m_nested_block_1->accept(this);
@@ -280,89 +298,88 @@ public:
   void visitAnd(And * p)
   {
     p->visit_children(this);
-    echo("pop %%ebx");
-    echo("pop %%eax");
-    echo("and %%ebx, %%eax");
-    echo("push %%eax");
+    echo("popl %%ebx");
+    echo("popl %%eax");
+    echo("andl %%ebx, %%eax");
+    echo("pushl %%eax");
   }
   void visitOr(Or * p)
   {
     p->visit_children(this);
-    echo("pop %%ebx");
-    echo("pop %%eax");
-    echo("or %%ebx, %%eax");
-    echo("push %%eax");
+    echo("popl %%ebx");
+    echo("popl %%eax");
+    echo("orl %%ebx, %%eax");
+    echo("pushl %%eax");
   }
   void visitMinus(Minus * p)
   {
     p->visit_children(this);
-    echo("pop %%ebx");
-    echo("pop %%eax");
-    // TODO: Test order might be wrong!
-    echo("sub %%ebx, %%eax");
-    echo("push %%eax");
+    echo("popl %%ebx");
+    echo("popl %%eax");
+    echo("subl %%ebx, %%eax");
+    echo("pushl %%eax");
   }
   void visitPlus(Plus * p)
   {
     p->visit_children(this);
-    echo("pop %%ebx");
-    echo("pop %%eax");
-    echo("add %%ebx, %%eax");
-    echo("push %%eax");
+    echo("popl %%ebx");
+    echo("popl %%eax");
+    echo("addl %%ebx, %%eax");
+    echo("pushl %%eax");
   }
   void visitTimes(Times * p)
   {
     p->visit_children(this);
-    echo("pop %%ebx");
-    echo("pop %%eax");
-    echo("imul %%ebx"); // multiply %ebx by %eax
-    echo("push %%eax");
+    echo("popl %%ebx");
+    echo("popl %%eax");
+    echo("imull %%ebx"); // multiply %ebx by %eax
+    echo("pushl %%eax");
   }
   void visitDiv(Div * p)
   {
     p->visit_children(this);
-    echo("pop %%ebx");
-    echo("pop %%eax");
+    echo("popl %%ebx");
+    echo("popl %%eax");
     echo("cdq"); // sign-extend %eax into %edx
-    echo("idiv %%ebx"); // divide %ebx by %edx:%eax
-    echo("push %%eax");
+    echo("idivl %%ebx"); // divide %ebx by %edx:%eax
+    echo("pushl %%eax");
   }
   void visitNot(Not * p)
   {
     p->visit_children(this);
-    echo("pop %%eax");
-    echo("not %%eax");
-    echo("push %%eax");
+    echo("popl %%eax");
+    echo("notl %%eax");
+    echo("pushl %%eax");
   }
   void visitUminus(Uminus * p)
   {
     p->visit_children(this);
-    echo("pop %%eax");
-    echo("neg %%eax");
-    echo("push %%eax");
+    echo("popl %%eax");
+    echo("negl %%eax");
+    echo("pushl %%eax");
   }
   void visitMagnitude(Magnitude * p)
   {
     p->visit_children(this);
-    echo("pop %%eax");
+    echo("popl %%eax");
     echo("cdq");
-    echo("xor %%edx, %%eax");
-    echo("sub %%edx, %%eax");
-    echo("push %%eax");
+    echo("xorl %%edx, %%eax");
+    echo("subl %%edx, %%eax");
+    echo("pushl %%eax");
   }
 
   // variable and constant access
   void visitIdent(Ident * p)
   {
-    echo("push %d(%%ebp)", ebp_offset(p));
+    echo("pushl %d(%%ebp)", ebp_offset(p));
   }
   void visitIntLit(IntLit * p)
   {
-    echo("push $%d", p->m_primitive->m_data);
+    echo("pushl $%d", p->m_primitive->m_data);
   }
   void visitBoolLit(BoolLit * p)
   {
-    echo("push $%d", p->m_primitive->m_data);
+    echo("pushl $%d", p->m_primitive->m_data);
   }
   void visitArrayAccess(ArrayAccess * p)
   {
