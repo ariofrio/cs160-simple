@@ -172,8 +172,8 @@ public:
     list<Param_ptr>::iterator param_iter;
     forall(param_iter, p->m_param_list) {
       Param *pip = *param_iter;
-      echo("mov $%d(%%ebp), $%d(%%ebp)",
-          ebp_arg_offset(pip), ebp_offset(pip));
+      echo("mov %d(%%ebp), %%eax", ebp_arg_offset(pip));
+      echo("mov %%eax, %d(%%ebp)", ebp_offset(pip));
     }
 
     p->visit_children(this);
