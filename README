@@ -68,4 +68,8 @@ Andres Riofrio <ariofrio@cs.ucsb.edu>
    %eax`
  - Function arguments are copied to occupy the same space as local variables,
    for ease of access
+ - Constants are folded (behave as literal integers/booleans)
+ - `if` statements with constant values only output the selected branch
+ - `while` statements with constant values either eliminate the statement or
+   simplify the infinite loop
 
