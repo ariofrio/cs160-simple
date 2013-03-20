@@ -108,15 +108,6 @@ class Codegen : public Visitor
 	//
 	//////////////////////////////////////////////////////////////////////////////
   
-  void emit_prologue(SymName *name, unsigned int size_locals, unsigned int num_args)
-  {
-  }
-
-  void emit_epilogue()
-  {
-  }
-  
-  // HERE: more functions to emit code
   template<class type>
   inline int ebp_offset(type* node) {
     return -wordsize - m_st->lookup(
